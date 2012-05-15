@@ -1,0 +1,30 @@
+{
+  "name": "dork",
+  "version": "0.0.0",
+  "description": "Dragons, dragons everywhere.",
+  "keywords": [
+    "dragons"
+  ],
+  "author": "leeolayvar <leeolayvar@gmail.com> (http://leeolayvar.com)",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/leeolayvar/dork.git"
+  },
+  "bugs": {
+    "url": "http://github.com/leeolayvar/dork/issues"
+  },
+  "scripts": {
+    "test": "./test/index.js"
+  },
+  "devDependencies": {
+  },
+  "dependencies": {
+  },
+  "main": "./lib/index.js",
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://raw.github.com/leeolayvar/dork/master/LICENSE"
+    }
+  ]
+}
