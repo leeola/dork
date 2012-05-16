@@ -17,6 +17,8 @@
     "test": "./test/index.js"
   },
   "devDependencies": {
+    "mocha": "0.14.x",
+    "should": "0.5.x"
   },
   "dependencies": {
   },
