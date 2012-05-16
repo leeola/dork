@@ -7,4 +7,5 @@
 /*jshint asi: true, laxcomma: true*/
 
 
-require('./dork')
+require('./suite')
+require('./test')
