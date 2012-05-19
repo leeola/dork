@@ -67,66 +67,10 @@ describe('suite', function () {
       suite = suite_lib()
     })
     
-    it('should call the given suite\'s fn', function (done) {
-      var new_suite = suite_lib(function () {
-        done()
-      })
+    it('should append the suite to the stack', function (done) {
+      var new_suite = suite_lib('foo', 'bar')
       suite.add_suite(new_suite)
-    })
-    
-    // Here we are checking the timing of the scope assignment in the suite.
-    it('should set the scope to the newly created suite', function () {
-      var fn_called = false
-      
-      var new_suite = suite_lib(function () {
-        suite.scope.should.equal(new_suite)
-        fn_called = true
-      })
-      
-      suite.scope.should.equal(suite)
-      suite.add_suite(new_suite)
-      suite.scope.should.equal(suite)
-      
-      // And just to be safe, lets make sure the new suite's fn was called.
-      // this is tested by an above test, but lets just make sure.
-      fn_called.should.be.true
-    })
-    
-    // This is a rather complex test, so for further explanation please see
-    // the documentation on Suite.add_suite().
-    it('should set the scope to the nested suites', function () {
-      var fn_called = false
-      
-      var suite_a = suite_lib(function () {
-        
-        var suite_b = suite_lib(function () {
-          
-          // Finally it's c!
-          var suite_c = suite_lib(function () {
-            suite.scope.should.equal(suite_c)
-            fn_called = true
-          })
-          
-          // Add c
-          suite.scope.should.equal(suite_b)
-          suite.add_suite(suite_c)
-          suite.scope.should.equal(suite_b)
-        })
-        
-        // Add b
-        suite.scope.should.equal(suite_a)
-        suite.add_suite(suite_b)
-        suite.scope.should.equal(suite_a)
-      })
-      
-      // Add a
-      suite.scope.should.equal(suite)
-      suite.add_suite(suite_a)
-      suite.scope.should.equal(suite)
-      
-      // And just to be safe, lets make sure the new suite's fn was called.
-      // this is tested by an above test, but lets just make sure.
-      fn_called.should.be.true
+      suite.stack.should.equal([new_suite])
     })
   })
   
