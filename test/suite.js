@@ -74,6 +74,78 @@ describe('suite', function () {
     })
   })
   
+  describe('#add_test()', function () {
+    var test_lib = require('../lib/test')
+      , suite
+    
+    before_each(function () {
+      suite = suite_lib()
+    })
+    
+    it('should append the test to the stack', function (done) {
+      var test = test_lib('foo', 'bar')
+      suite.add_test(test)
+      suite.stack.should.equal([test])
+    })
+  })
+  
+  describe('#add_before()', function () {
+    var suite
+    
+    before_each(function () {
+      suite = suite_lib()
+    })
+    
+    it('should append the given function to the before stack', function (done) {
+      var fn = function () {}
+      suite.add_before(fn)
+      suite.before_stack.should.equal([fn])
+    })
+  })
+  
+  describe('#add_before_each()', function () {
+    var suite
+    
+    before_each(function () {
+      suite = suite_lib()
+    })
+    
+    it('should append the given function to the before each stack',
+    function (done) {
+      var fn = function () {}
+      suite.add_before_each(fn)
+      suite.before_each_stack.should.equal([fn])
+    })
+  })
+  
+  describe('#add_after()', function () {
+    var suite
+    
+    before_each(function () {
+      suite = suite_lib()
+    })
+    
+    it('should append the given function to the after stack', function (done) {
+      var fn = function () {}
+      suite.add_after(fn)
+      suite.after_stack.should.equal([fn])
+    })
+  })
+  
+  describe('#add_after_each()', function () {
+    var suite
+    
+    before_each(function () {
+      suite = suite_lib()
+    })
+    
+    it('should append the given function to the after stack', function (done) {
+      var fn = function () {}
+      suite.add_after_each(fn)
+      suite.after_each_stack.should.equal([fn])
+    })
+  })
+  
   describe('#run()', function () {
     var suite
     
