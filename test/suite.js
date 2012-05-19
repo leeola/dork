@@ -27,9 +27,11 @@ describe('suite', function () {
     
     it('should return a suite object instance', function () {
       // To assert it's identity we're just going to make sure
-      // some basic tork functions exist.
+      // some basic dork functions exist.
       should.exist(suite.add_suite)
-      should.exist(suite.stack)
+      should.exist(suite.add_test)
+      should.exist(suite.add_before)
+      should.exist(suite.add_after_each)
     })
     
     it('should be a unique object each execution', function () {
@@ -40,34 +42,21 @@ describe('suite', function () {
       should.not.exist(new_suite.foo)
     })
     
-    it('should support a single fn', function () {
-      var fn = function () {}
-        , suite = suite_lib(fn)
-      
-      should.not.exist(suite.description)
-      should.not.exist(suite.location)
-      suite.fn.should.equal(fn)
-    })
-    
-    it('should support a description and a fn', function () {
-      var fn = function () {}
-        , description = 'foo'
-        , suite = suite_lib(description, fn)
+    it('should support a single description', function () {
+      var description = 'foo'
+        , suite = suite_lib(description)
       
       suite.description.should.equal(description)
       should.not.exist(suite.location)
-      suite.fn.should.equal(fn)
     })
     
-    it('should support a description, location, and a fn', function () {
-      var fn = function () {}
-        , description = 'foo'
+    it('should support a description and a location', function () {
+      var description = 'foo'
         , location = 'bar'
-        , suite = suite_lib(description, location, fn)
+        , suite = suite_lib(description, location)
       
       suite.description.should.equal(description)
       suite.location.should.equal(location)
-      suite.fn.should.equal(fn)
     })
   })
   
