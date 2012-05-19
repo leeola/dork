@@ -70,7 +70,7 @@ describe('suite', function () {
     it('should append the suite to the stack', function () {
       var new_suite = suite_lib('foo', 'bar')
       suite.add_suite(new_suite)
-      suite.stack.should.equal([new_suite])
+      suite.stack.should.eql([new_suite])
     })
   })
   
@@ -85,7 +85,7 @@ describe('suite', function () {
     it('should append the test to the stack', function () {
       var test = test_lib('foo', 'bar')
       suite.add_test(test)
-      suite.stack.should.equal([test])
+      suite.stack.should.eql([test])
     })
   })
   
@@ -99,7 +99,7 @@ describe('suite', function () {
     it('should append the given function to the before stack', function () {
       var fn = function () {}
       suite.add_before(fn)
-      suite.before_stack.should.equal([fn])
+      suite.before_stack.should.eql([fn])
     })
   })
   
@@ -114,7 +114,7 @@ describe('suite', function () {
     function () {
       var fn = function () {}
       suite.add_before_each(fn)
-      suite.before_each_stack.should.equal([fn])
+      suite.before_each_stack.should.eql([fn])
     })
   })
   
@@ -128,7 +128,7 @@ describe('suite', function () {
     it('should append the given function to the after stack', function () {
       var fn = function () {}
       suite.add_after(fn)
-      suite.after_stack.should.equal([fn])
+      suite.after_stack.should.eql([fn])
     })
   })
   
@@ -142,7 +142,7 @@ describe('suite', function () {
     it('should append the given function to the after stack', function () {
       var fn = function () {}
       suite.add_after_each(fn)
-      suite.after_each_stack.should.equal([fn])
+      suite.after_each_stack.should.eql([fn])
     })
   })
   
