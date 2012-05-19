@@ -67,7 +67,7 @@ describe('suite', function () {
       suite = suite_lib()
     })
     
-    it('should append the suite to the stack', function (done) {
+    it('should append the suite to the stack', function () {
       var new_suite = suite_lib('foo', 'bar')
       suite.add_suite(new_suite)
       suite.stack.should.equal([new_suite])
@@ -82,7 +82,7 @@ describe('suite', function () {
       suite = suite_lib()
     })
     
-    it('should append the test to the stack', function (done) {
+    it('should append the test to the stack', function () {
       var test = test_lib('foo', 'bar')
       suite.add_test(test)
       suite.stack.should.equal([test])
@@ -96,7 +96,7 @@ describe('suite', function () {
       suite = suite_lib()
     })
     
-    it('should append the given function to the before stack', function (done) {
+    it('should append the given function to the before stack', function () {
       var fn = function () {}
       suite.add_before(fn)
       suite.before_stack.should.equal([fn])
@@ -111,7 +111,7 @@ describe('suite', function () {
     })
     
     it('should append the given function to the before each stack',
-    function (done) {
+    function () {
       var fn = function () {}
       suite.add_before_each(fn)
       suite.before_each_stack.should.equal([fn])
@@ -125,7 +125,7 @@ describe('suite', function () {
       suite = suite_lib()
     })
     
-    it('should append the given function to the after stack', function (done) {
+    it('should append the given function to the after stack', function () {
       var fn = function () {}
       suite.add_after(fn)
       suite.after_stack.should.equal([fn])
@@ -139,7 +139,7 @@ describe('suite', function () {
       suite = suite_lib()
     })
     
-    it('should append the given function to the after stack', function (done) {
+    it('should append the given function to the after stack', function () {
       var fn = function () {}
       suite.add_after_each(fn)
       suite.after_each_stack.should.equal([fn])
