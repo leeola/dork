@@ -28,7 +28,7 @@ describe('suite', function () {
     it('should return a suite object instance', function () {
       // To assert it's identity we're just going to make sure
       // some basic tork functions exist.
-      should.exist(suite.push)
+      should.exist(suite.add_suite)
       should.exist(suite.stack)
     })
     
