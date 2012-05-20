@@ -22,7 +22,7 @@ describe('test', function () {
     var test
     
     before_each(function () {
-      test = test_lib('foo', 'bar', function () {})
+      test = test_lib.create('foo', 'bar', function () {})
     })
     
     it('should return a test object instance', function () {
@@ -37,7 +37,7 @@ describe('test', function () {
     })
     
     it('should be a unique object each execution', function () {
-      var new_test = test_lib()
+      var new_test = test_lib.create()
         , old_test = test
       
       old_test.foo = 'bar'

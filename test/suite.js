@@ -22,7 +22,7 @@ describe('suite', function () {
     var suite
     
     before_each(function () {
-      suite = suite_lib()
+      suite = suite_lib.create()
     })
     
     it('should return a suite object instance', function () {
@@ -35,7 +35,7 @@ describe('suite', function () {
     })
     
     it('should be a unique object each execution', function () {
-      var new_suite = suite_lib()
+      var new_suite = suite_lib.create()
         , old_suite = suite
       
       old_suite.foo = 'bar'
@@ -44,7 +44,7 @@ describe('suite', function () {
     
     it('should support a single description', function () {
       var description = 'foo'
-        , suite = suite_lib(description)
+        , suite = suite_lib.create(description)
       
       suite.description.should.equal(description)
       should.not.exist(suite.location)
@@ -53,7 +53,7 @@ describe('suite', function () {
     it('should support a description and a location', function () {
       var description = 'foo'
         , location = 'bar'
-        , suite = suite_lib(description, location)
+        , suite = suite_lib.create(description, location)
       
       suite.description.should.equal(description)
       suite.location.should.equal(location)
@@ -64,11 +64,11 @@ describe('suite', function () {
     var suite
     
     before_each(function () {
-      suite = suite_lib()
+      suite = suite_lib.create()
     })
     
     it('should append the suite to the stack', function () {
-      var new_suite = suite_lib('foo', 'bar')
+      var new_suite = suite_lib.create('foo', 'bar')
       suite.add_suite(new_suite)
       suite.stack.should.eql([new_suite])
     })
@@ -79,11 +79,11 @@ describe('suite', function () {
       , suite
     
     before_each(function () {
-      suite = suite_lib()
+      suite = suite_lib.create()
     })
     
     it('should append the test to the stack', function () {
-      var test = test_lib('foo', 'bar')
+      var test = test_lib.create('foo', 'bar')
       suite.add_test(test)
       suite.stack.should.eql([test])
     })
@@ -93,7 +93,7 @@ describe('suite', function () {
     var suite
     
     before_each(function () {
-      suite = suite_lib()
+      suite = suite_lib.create()
     })
     
     it('should append the given function to the before stack', function () {
@@ -107,7 +107,7 @@ describe('suite', function () {
     var suite
     
     before_each(function () {
-      suite = suite_lib()
+      suite = suite_lib.create()
     })
     
     it('should append the given function to the before each stack',
@@ -122,7 +122,7 @@ describe('suite', function () {
     var suite
     
     before_each(function () {
-      suite = suite_lib()
+      suite = suite_lib.create()
     })
     
     it('should append the given function to the after stack', function () {
@@ -136,7 +136,7 @@ describe('suite', function () {
     var suite
     
     before_each(function () {
-      suite = suite_lib()
+      suite = suite_lib.create()
     })
     
     it('should append the given function to the after stack', function () {
@@ -150,7 +150,7 @@ describe('suite', function () {
     var suite
     
     before_each(function () {
-      suite = suite_lib()
+      suite = suite_lib.create()
     })
   })
 })
