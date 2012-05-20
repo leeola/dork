@@ -16,24 +16,24 @@ var before = global.before
 
 
 describe('test', function () {
-  var test_lib = require('../lib/suite')
+  var test_lib = require('../lib/test')
   
   describe('#()', function () {
     var test
     
     before_each(function () {
-      test = test_lib()
+      test = test_lib('foo', 'bar', function () {})
     })
     
     it('should return a test object instance', function () {
       // To assert it's identity we're just going to make sure
-      // some basic tork functions exist.
+      // some basic test functions exist.
       should.exist(test.description)
       should.exist(test.fn)
       // And since the test object is not that unique, lets make sure it's
       // not a suite object.
-      should.not.exist(test.push)
-      should.not.exist(test.stack)
+      should.not.exist(test.add_suite)
+      should.not.exist(test.add_test)
     })
     
     it('should be a unique object each execution', function () {
