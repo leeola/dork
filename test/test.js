@@ -45,4 +45,43 @@ describe('test', function () {
       should.not.exist(new_test.foo)
     })
   })
+  
+  describe('#run()', function () {
+    
+    describe('passing test, ', function () {
+      var test
+      
+      before_each(function () {
+        test = test_lib.create('foo', 'bar', function () {})
+      })
+      
+      // At the moment the report object is in early design.. so lets just
+      // test the basics of it while the code shapes up.
+      it('should return report object', function () {
+        var report
+        
+        test.run(function (r) { report = r })
+        
+        report.success.should.be.true
+      })
+    })
+    
+    describe('thrown error test, ', function () {
+      var test
+      
+      before_each(function () {
+        test = test_lib.create('foo', 'bar', function () {
+          throw new Error('Fail Test')
+        })
+      })
+      
+      it('should return report object', function () {
+        var report
+        
+        test.run(function (r) { report = r })
+        
+        report.success.should.be.false
+      })
+    })
+  })
 })
