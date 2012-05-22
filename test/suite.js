@@ -147,10 +147,124 @@ describe('suite', function () {
   })
   
   describe('#run()', function () {
-    var suite
+    var test_lib = require('../lib/test')
+      , suite
     
     before_each(function () {
       suite = suite_lib.create()
+    })
+    
+    it('should callback with a report', function (done) {
+      suite.run(function (report) {
+        report.test_count.should.equal(0)
+        done()
+      })
+    })
+    
+    it('should run all added tests', function (done) {
+      var count_a = 0
+        , count_b = 0
+      suite.add_test(test_lib.create(function () { count_a++ }))
+      suite.add_test(test_lib.create(function () { count_b++ }))
+      suite.run(function () {
+        count_a.should.equal(1)
+        count_b.should.equal(1)
+        done()
+      })
+    })
+    
+    it('should run all added suites', function (done) {
+      var count_a = 0
+        , count_b = 0
+        , sub_suite = suite_lib.create()
+      suite.add_suite(sub_suite)
+      sub_suite.add_test(test_lib.create(function () { count_a++ }))
+      sub_suite.add_test(test_lib.create(function () { count_b++ }))
+      suite.run(function () {
+        count_a.should.equal(1)
+        count_b.should.equal(1)
+        done()
+      })
+    })
+    
+    it('should call before()s once, before tests', function (done) {
+      var count_a = 0
+        , count_b = 0
+      suite.add_before(function () { count_a++ })
+      suite.add_before(function () { count_b++ })
+      suite.add_test(test_lib.create(function () {
+        count_a.should.equal(1)
+        count_b.should.equal(1)
+      }))
+      suite.add_test(test_lib.create(function () {
+        count_a.should.equal(1)
+        count_b.should.equal(1)
+      }))
+      suite.run(function () {
+        count_a.should.equal(1)
+        count_b.should.equal(1)
+        done()
+      })
+    })
+    
+    it('should call before_each()\'s before each test', function (done) {
+      var count_a = 0
+        , count_b = 0
+      suite.add_before_each(function () { count_a++ })
+      suite.add_before_each(function () { count_b++ })
+      suite.add_test(test_lib.create(function () {
+        count_a.should.equal(1)
+        count_b.should.equal(1)
+      }))
+      suite.add_test(test_lib.create(function () {
+        count_a.should.equal(2)
+        count_b.should.equal(2)
+      }))
+      suite.run(function () {
+        count_a.should.equal(2)
+        count_b.should.equal(2)
+        done()
+      })
+    })
+    
+    it('should call after()\'s after tests', function (done) {
+      var count_a = 0
+        , count_b = 0
+      suite.add_after(function () { count_a++ })
+      suite.add_after(function () { count_b++ })
+      suite.add_test(test_lib.create(function () {
+        count_a.should.equal(0)
+        count_b.should.equal(0)
+      }))
+      suite.add_test(test_lib.create(function () {
+        count_a.should.equal(0)
+        count_b.should.equal(0)
+      }))
+      suite.run(function () {
+        count_a.should.equal(1)
+        count_b.should.equal(1)
+        done()
+      })
+    })
+    
+    it('should call after_each()\'s after each test', function (done) {
+      var count_a = 0
+        , count_b = 0
+      suite.add_after_each(function () { count_a++ })
+      suite.add_after_each(function () { count_b++ })
+      suite.add_test(test_lib.create(function () {
+        count_a.should.equal(0)
+        count_b.should.equal(0)
+      }))
+      suite.add_test(test_lib.create(function () {
+        count_a.should.equal(1)
+        count_b.should.equal(1)
+      }))
+      suite.run(function () {
+        count_a.should.equal(2)
+        count_b.should.equal(2)
+        done()
+      })
     })
   })
 })
