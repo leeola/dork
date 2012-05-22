@@ -173,20 +173,6 @@ describe('suite', function () {
       })
     })
     
-    it('should run all added suites', function (done) {
-      var count_a = 0
-        , count_b = 0
-        , sub_suite = suite_lib.create()
-      suite.add_suite(sub_suite)
-      sub_suite.add_test(test_lib.create(function () { count_a++ }))
-      sub_suite.add_test(test_lib.create(function () { count_b++ }))
-      suite.run(function () {
-        count_a.should.equal(1)
-        count_b.should.equal(1)
-        done()
-      })
-    })
-    
     it('should call before()s once, before tests', function (done) {
       var count_a = 0
         , count_b = 0
@@ -263,6 +249,56 @@ describe('suite', function () {
       suite.run(function () {
         count_a.should.equal(2)
         count_b.should.equal(2)
+        done()
+      })
+    })
+    
+    it('should run all added suites', function (done) {
+      var count_a = 0
+        , count_b = 0
+        , sub_suite = suite_lib.create()
+      suite.add_suite(sub_suite)
+      sub_suite.add_test(test_lib.create(function () { count_a++ }))
+      sub_suite.add_test(test_lib.create(function () { count_b++ }))
+      suite.run(function () {
+        count_a.should.equal(1)
+        count_b.should.equal(1)
+        done()
+      })
+    })
+    
+    // A sort of catch all test, since we previously defined a lot of
+    // tests for 1 level, this will cover all sub levels. If needed we'll
+    // add more in the future.
+    it('should work with cascaded suites', function (done) {
+      var after_count = 0
+        , after_each_count = 0
+        , before_count = 0
+        , before_each_count = 0
+        , sub_test_count = 0
+        , sub_suite = suite_lib.create()
+        , sub_sub_suite = suite_lib.create()
+      
+      // Add our befores/afters
+      suite.add_before(function () { before_count++ })
+      suite.add_after(function () { after_count++ })
+      suite.add_before_each(function () { before_each_count++ })
+      suite.add_after_each(function () { after_each_count++ })
+      
+      // Add our two suites
+      suite.add_suite(sub_suite)
+      sub_suite.add_suite(sub_sub_suite)
+      
+      // Add a test to each sub/sub_sub suite.
+      sub_suite.add_test(test_lib.create(function () { sub_test_count++ }))
+      sub_sub_suite.add_test(test_lib.create(function () {}))
+      
+      suite.run(function () {
+        before_count.should.equal(1)
+        after_count.should.equal(1)
+        before_each_count.should.equal(2)
+        after_each_count.should.equal(2)
+        sub_test_count.should.equal(1)
         done()
       })
     })
