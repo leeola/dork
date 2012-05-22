@@ -254,17 +254,22 @@ describe('suite', function () {
     })
     
     it('should run all added suites', function (done) {
-      var count_a = 0
-        , count_b = 0
+      var count = 0
         , sub_suite = suite_lib.create()
+      
+      // Mock the sub_suite
+      sub_suite.run = function () {
+        count++
+      }
+      
       suite.add_suite(sub_suite)
-      sub_suite.add_test(test_lib.create(function () { count_a++ }))
-      sub_suite.add_test(test_lib.create(function () { count_b++ }))
-      suite.run(function () {
-        count_a.should.equal(1)
-        count_b.should.equal(1)
-        done()
-      })
+      // Because we mocked `sub_suite.run()` we broke the run callback system.
+      // But! It should still run, it will just never return.
+      suite.run()
+      // So, now after our suite has run, it should have called
+      // `sub_suite.run()`, triggering our `count++` call. So we're testing
+      // for that.
+      count.should.equal(1)
     })
   })
 })
