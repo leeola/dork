@@ -253,7 +253,7 @@ describe('suite', function () {
       })
     })
     
-    it('should run all added suites', function (done) {
+    it('should run all added suites', function () {
       var count = 0
         , sub_suite = suite_lib.create()
       
