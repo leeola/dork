@@ -60,6 +60,64 @@ describe('suite', function () {
     })
   })
   
+  describe('#_build_session()', function () {
+    var test_lib = require('../lib/test')
+      , suite
+    
+    before_each(function () {
+      suite = suite_lib.create()
+    })
+      
+    it('should not error with no params', function () {
+      suite._build_session()
+    })
+    
+    describe('Empty suite,', function () {
+      it('should return an empty list', function () {
+        var result = suite._build_session()
+        result.should.eql([])
+      })
+    })
+    
+    describe('With tests,', function () {
+      var test_a
+        , test_b
+      
+      before_each(function () {
+        test_a = test_lib.create()
+        test_b = test_lib.create()
+        suite.add_test(test_a)
+        suite.add_test(test_b)
+      })
+      
+      it('should return a list of tests', function () {
+        var result = suite._build_session()
+        result.should.eql([test_a, test_b])
+      })
+    })
+    
+    describe('With befores,', function () {
+      before_each(function () {
+        suite.add_before(function () {})
+      })
+      
+      it('should return an empty list', function () {
+        var result = suite._build_session()
+        result.should.eql([])
+      })
+      
+      describe('And tests, ', function () {
+        before_each(function () {
+          suite.add_before(function () {})
+        })
+        
+        it('should return the befores then the tests', function () {
+          
+        })
+      })
+    })
+  })
+  
   describe('#add_suite()', function () {
     var suite
     
@@ -99,7 +157,7 @@ describe('suite', function () {
     it('should append the given function to the before stack', function () {
       var fn = function () {}
       suite.add_before(fn)
-      suite.before_stack.should.eql([fn])
+      suite.befores.should.eql([fn])
     })
   })
   
@@ -114,7 +172,7 @@ describe('suite', function () {
     function () {
       var fn = function () {}
       suite.add_before_each(fn)
-      suite.before_each_stack.should.eql([fn])
+      suite.before_eachs.should.eql([fn])
     })
   })
   
@@ -128,7 +186,7 @@ describe('suite', function () {
     it('should append the given function to the after stack', function () {
       var fn = function () {}
       suite.add_after(fn)
-      suite.after_stack.should.eql([fn])
+      suite.afters.should.eql([fn])
     })
   })
   
@@ -142,10 +200,10 @@ describe('suite', function () {
     it('should append the given function to the after stack', function () {
       var fn = function () {}
       suite.add_after_each(fn)
-      suite.after_each_stack.should.eql([fn])
+      suite.after_eachs.should.eql([fn])
     })
   })
-  
+  /*
   describe('#run()', function () {
     var test_lib = require('../lib/test')
       , suite
@@ -272,4 +330,5 @@ describe('suite', function () {
       count.should.equal(1)
     })
   })
+  */
 })
