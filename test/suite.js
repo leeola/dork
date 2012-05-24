@@ -128,7 +128,7 @@ describe('suite', function () {
     it('should append the suite to the stack', function () {
       var new_suite = suite_lib.create('foo', 'bar')
       suite.add_suite(new_suite)
-      suite.stack.should.eql([new_suite])
+      suite.tests_and_suites.should.eql([new_suite])
     })
   })
   
@@ -143,7 +143,7 @@ describe('suite', function () {
     it('should append the test to the stack', function () {
       var test = test_lib.create('foo', 'bar')
       suite.add_test(test)
-      suite.stack.should.eql([test])
+      suite.tests_and_suites.should.eql([test])
     })
   })
   
