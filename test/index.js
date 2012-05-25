@@ -54,6 +54,9 @@ describe('index', function () {
 
 
 
-require('./dork')
-require('./suite')
+require('./runner')
 require('./test')
+
+require('./suite')
+
+require('./dork')
