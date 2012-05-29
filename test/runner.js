@@ -107,8 +107,8 @@ describe('runner', function () {
         runner.run(function (report) {
           report.success.should.be.false
           report.time.should.be.within(
-            report.time - time_tolerance,
-            report.time + time_tolerance
+            200 - time_tolerance,
+            200 + time_tolerance
           )
           done()
         })
