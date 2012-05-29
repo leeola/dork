@@ -19,7 +19,7 @@ var before = global.before
 describe('runner', function () {
   var runner_lib = require('../lib/runner')
   // The tolerance we're using to assert correct execution times.
-  var time_tolerance = 20
+  var time_tolerance = 5
   
   describe('create()', function () {
     var runner
