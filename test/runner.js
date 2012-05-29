@@ -18,6 +18,8 @@ var before = global.before
 
 describe('runner', function () {
   var runner_lib = require('../lib/runner')
+  // The tolerance we're using to assert correct execution times.
+  var time_tolerance = 20
   
   describe('create()', function () {
     var runner
@@ -101,11 +103,13 @@ describe('runner', function () {
           setTimeout(done, 500) }, 200)
       })
       
-      // Timeout testing is a bit tricky. We'll add more as runner shapes up
       it('should timeout if execution time exceeds timeout', function (done) {
         runner.run(function (report) {
-          // We need more report object testing in this..
           report.success.should.be.false
+          report.time.should.be.within(
+            report.time - time_tolerance,
+            report.time + time_tolerance
+          )
           done()
         })
       })
