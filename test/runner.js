@@ -114,5 +114,59 @@ describe('runner', function () {
         })
       })
     })
+    
+    describe('Time measurements,', function () {
+      
+      describe('100ms,', function () {
+        before_each(function () {
+          runner = runner_lib.create(function (done) {
+            setTimeout(done, 100) })
+        })
+        
+        it('should callback with a time within tolerance', function (done) {
+          runner.run(function (report) {
+            report.time.should.be.within(
+              100 - time_tolerance,
+              100 + time_tolerance
+            )
+            done()
+          })
+        })
+      })
+      
+      describe('300ms,', function () {
+        before_each(function () {
+          runner = runner_lib.create(function (done) {
+            setTimeout(done, 300) })
+        })
+        
+        it('should callback with a time within tolerance', function (done) {
+          runner.run(function (report) {
+            report.time.should.be.within(
+              300 - time_tolerance,
+              300 + time_tolerance
+            )
+            done()
+          })
+        })
+      })
+      
+      describe('500ms,', function () {
+        before_each(function () {
+          runner = runner_lib.create(function (done) {
+            setTimeout(done, 500) })
+        })
+        
+        it('should callback with a time within tolerance', function (done) {
+          runner.run(function (report) {
+            report.time.should.be.within(
+              500 - time_tolerance,
+              500 + time_tolerance
+            )
+            done()
+          })
+        })
+      })
+    })
   })
 })
