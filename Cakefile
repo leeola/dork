@@ -7,44 +7,48 @@
 fs = require 'fs'
 util = require 'util'
 path = require 'path'
-coffee_script = require './node_modules/coffee-script/lib/coffee-script'
+{exec} = require 'child_process'
+coffee_script = require 'coffee-script'
 coffee_command = require './node_modules/coffee-script/lib/coffee-script/command'
 
 coffee_build = (args) ->
   argv = process.argv
   args[...0] = argv[0]
   process.argv = args
-  console.log 'Uhh..'
   coffee_command.run()
   process.argv = argv
 
 copy_js = (source, output) ->
-  console.log "Copying `#{source}` to `#{output}`"
   ins = fs.createReadStream source
   outs = fs.createWriteStream output
   util.pump ins, outs
 
-copy_all_js = (source, output) ->
+compile_coffee = (source, output) ->
+  fs.readFile source, 'utf8', (err, data) ->
+    compiled = coffee_script.compile data
+    fs.writeFile output, compiled
+
+compile_dir = (source, output) ->
   if source is undefined
     return
   
   fs.stat source, (err, stats) ->
-    #console.log "Stats for.. #{source}"
     if stats.isFile() is true
       if path.extname(source) is '.js'
         copy_js source, output
+      else if path.extname(source) is '.coffee'
+        output = "#{output[...-7]}.js"
+        compile_coffee source, output
     else if stats.isDirectory() is true
       fs.readdir source, (err, files) ->
         for file in files
-          copy_all_js path.join(source, file), path.join(output, file)
+          compile_dir path.join(source, file), path.join(output, file)
 
 compile = (source, output) ->
   command_args = ['--compile', '--output', output, source]
-  coffee_build command_args
-  copy_all_js source, output
+  #coffee_build command_args
+  compile_dir source, output
 
 task 'build', 'Build', ->
-  console.log 'Starting build..'
-  compile 'lib/', 'build/lib/'
   compile 'foo/', 'build/foo/'
-  console.log 'Finished build..'
+  compile 'lib/', 'build/lib/'
