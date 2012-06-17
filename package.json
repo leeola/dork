@@ -14,7 +14,8 @@
     "url": "http://github.com/leeolayvar/dork/issues"
   },
   "scripts": {
-    "test": "./test/index.js"
+    "prepublish": "cake prepublish",
+    "test": "./build/test/index.js"
   },
   "devDependencies": {
     "mocha": "0.14.x",
@@ -23,7 +24,7 @@
   },
   "dependencies": {
   },
-  "main": "./lib/index.js",
+  "main": "./build/lib/index.js",
   "licenses": [
     {
       "type": "MIT",
