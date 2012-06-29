@@ -18,8 +18,8 @@ var before = global.before
 
 describe('runner', function () {
   var runner_lib = require('../lib/runner')
-  // The tolerance we're using to assert correct execution times.
-  var time_tolerance = 5
+  // The tolerance we're using to assert correct execution times, in ms.
+  var time_tolerance = 60
   
   describe('create()', function () {
     var runner
@@ -29,10 +29,7 @@ describe('runner', function () {
     })
     
     it('should return a runner object instance', function () {
-      // To assert it's identity we're just going to make sure
-      // some basic test functions exist.
-      should.exist(runner._fn)
-      should.exist(runner._timeout)
+      runner.should.be.an.instanceof(runner_lib.Runner)
     })
     
     it('should be a unique object each execution', function () {

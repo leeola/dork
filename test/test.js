@@ -27,14 +27,7 @@ describe('test', function () {
     })
     
     it('should return a test object instance', function () {
-      // To assert it's identity we're just going to make sure
-      // some basic test functions exist.
-      should.exist(test.description)
-      should.exist(test.fn)
-      // And since the test object is not that unique, lets make sure it's
-      // not a suite object.
-      should.not.exist(test.add_suite)
-      should.not.exist(test.add_test)
+      test.should.be.an.instanceof(test_lib.Test)
     })
     
     it('should be a unique object each execution', function () {
