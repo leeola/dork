@@ -30,7 +30,7 @@ describe('test', function () {
       // To assert it's identity we're just going to make sure
       // some basic test functions exist.
       should.exist(test.description)
-      should.exist(test.fn)
+      should.exist(test._fn)
       // And since the test object is not that unique, lets make sure it's
       // not a suite object.
       should.not.exist(test.add_suite)
