@@ -50,16 +50,14 @@ exec = (cmd, args=[], cb=->) ->
 copy = (source, output, match=(->true), callback=->) ->
   # Our root Bork task
   bork_task = bork()
-  bork_task.seq -> console.log 'copy done.'; callback()
+  bork_task.seq -> callback()
   
   # Define our fs logic for copying
   copy_file = (file_source, callback) ->
     file_output = path.join output, path.relative(source, file_source)
-    #ins = fs.createReadStream source
-    #ous = fs.createWriteStream output
-    #util.pump ins, ous, callback
-    console.log "Copying #{file_source} to #{file_output}"
-    callback()
+    ins = fs.createReadStream file_source
+    ous = fs.createWriteStream file_output
+    util.pump ins, ous, callback
   
   # Set up our dir walker
   walker = Walker source
@@ -83,8 +81,7 @@ copy_compile = (source, output, callback) ->
   bork_task = bork()
   
   coffee_task = bork_task.seq (done) ->
-    #exec COFFEE_BIN, ['-co', source, output], -> done()
-    done()
+    exec COFFEE_BIN, ['-co', output, source], -> done()
   
   coffee_task.seq (done) ->
     copy source, output,
@@ -128,6 +125,13 @@ task 'test:full', 'build test, then run it', ->
   invoke 'build:test'
   invoke 'test:nobuild'
   bork_task.start()
+
+task 'test:nobuild', 'just run the tests, don\'t build anything', ->
+  bork_task.seq (done) ->
+    console.log 'test start'
+    exec MOCHA_BIN, ['./test'], ->
+      console.log 'test done'
+      done()
 
 task 'prepublish', 'build all, test all. designed to work before `npm publish`', ->
   invoke 'build:lib'
