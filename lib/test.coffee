@@ -31,14 +31,16 @@ create = (description, location, fn, timeout) ->
   # Note this this method of creation/inheritance is going to be replaced
   # once i find a method that isn't ugly and is true to javascript.. if
   # that's even possible.
-  utils.merge test, proto
+  utils.merge test, runner.proto
   test.init_runner = test.init
   
   utils.merge test, proto
   test.init description, location, fn, timeout
+  
+  return test
 
 # The 'prototype' for our object.
-proto = module.exports = {}
+proto = exports.proto = {}
 
 # (description, location) -> object
 #
