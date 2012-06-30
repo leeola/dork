@@ -68,7 +68,7 @@ class Suite
       # If we had at least one test in this suite, or any subsuites, then
       # we want to append our `@_afters` to the session.
       if session.length > 0
-        session.push @_afters
+        session.push @_afters...
       return session
     
     if item instanceof Suite
