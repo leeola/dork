@@ -44,7 +44,7 @@ describe 'Suite', ->
         result = suite._build_session()
         result.should.eql([test_a, test_b])
       
-      describe 'and befores', ->
+      describe 'and a before', ->
         before_a = null
         
         before_each ->
@@ -54,3 +54,36 @@ describe 'Suite', ->
         it 'it should return [before, test, test]', ->
           result = suite._build_session()
           result.should.eql([before_a, test_a, test_b])
+      
+      describe 'and a before_each', ->
+        before_each_a = null
+        
+        before_each ->
+          before_each_a = new Runner()
+          suite.add_before_each before_each_a
+        
+        it 'it should return [before_each, test, before_each, test]', ->
+          result = suite._build_session()
+          result.should.eql([before_each_a, test_a, before_each_a, test_b])
+      
+      describe 'and an after', ->
+        after_a = null
+        
+        before_each ->
+          after_a = new Runner()
+          suite.add_after after_a
+        
+        it 'it should return [test, test, after]', ->
+          result = suite._build_session()
+          result.should.eql([test_a, test_b, after_a])
+      
+      describe 'and an after_each', ->
+        after_each_a = null
+        
+        before_each ->
+          after_each_a = new Runner()
+          suite.add_after_each after_each_a
+        
+        it 'it should return [test, after_each, test, after_each]', ->
+          result = suite._build_session()
+          result.should.eql([test_a, after_each_a, test_b, after_each_a])
