@@ -17,6 +17,8 @@ var before = global.before
 
 describe('suite', function () {
   var suite_lib = require('../lib/suite')
+    , runner_lib = require('../lib/runner')
+    , test_lib = require('../lib/runner')
   
   describe('#()', function () {
     var suite
@@ -26,12 +28,7 @@ describe('suite', function () {
     })
     
     it('should return a suite object instance', function () {
-      // To assert it's identity we're just going to make sure
-      // some basic suite functions exist.
-      should.exist(suite.add_suite)
-      should.exist(suite.add_test)
-      should.exist(suite.add_before)
-      should.exist(suite.add_after_each)
+      suite.should.be.an.instanceof(suite_lib.Suite)
     })
     
     it('should be a unique object each execution', function () {
@@ -128,7 +125,7 @@ describe('suite', function () {
     it('should append the suite to the stack', function () {
       var new_suite = suite_lib.create('foo', 'bar')
       suite.add_suite(new_suite)
-      suite.tests_and_suites.should.eql([new_suite])
+      suite._tests_and_suites.should.eql([new_suite])
     })
   })
   
@@ -143,7 +140,7 @@ describe('suite', function () {
     it('should append the test to the stack', function () {
       var test = test_lib.create('foo', 'bar')
       suite.add_test(test)
-      suite.tests_and_suites.should.eql([test])
+      suite._tests_and_suites.should.eql([test])
     })
   })
   
@@ -154,10 +151,10 @@ describe('suite', function () {
       suite = suite_lib.create()
     })
     
-    it('should append the given function to the before stack', function () {
-      var fn = function () {}
-      suite.add_before(fn)
-      suite.befores.should.eql([fn])
+    it('should append the given runner to the before stack', function () {
+      var runner = new runner_lib.Runner(function () {})
+      suite.add_before(runner)
+      suite._befores.should.eql([runner])
     })
   })
   
@@ -168,11 +165,11 @@ describe('suite', function () {
       suite = suite_lib.create()
     })
     
-    it('should append the given function to the before each stack',
+    it('should append the given runner to the before each stack',
     function () {
-      var fn = function () {}
-      suite.add_before_each(fn)
-      suite.before_eachs.should.eql([fn])
+      var runner = new runner_lib.Runner(function () {})
+      suite.add_before_each(runner)
+      suite._before_eachs.should.eql([runner])
     })
   })
   
@@ -183,10 +180,10 @@ describe('suite', function () {
       suite = suite_lib.create()
     })
     
-    it('should append the given function to the after stack', function () {
-      var fn = function () {}
-      suite.add_after(fn)
-      suite.afters.should.eql([fn])
+    it('should append the given runner to the after stack', function () {
+      var runner = new runner_lib.Runner(function () {})
+      suite.add_after(runner)
+      suite._afters.should.eql([runner])
     })
   })
   
@@ -197,10 +194,10 @@ describe('suite', function () {
       suite = suite_lib.create()
     })
     
-    it('should append the given function to the after stack', function () {
-      var fn = function () {}
-      suite.add_after_each(fn)
-      suite.after_eachs.should.eql([fn])
+    it('should append the given runner to the after stack', function () {
+      var runner = new runner_lib.Runner(function () {})
+      suite.add_after_each(runner)
+      suite._after_eachs.should.eql([runner])
     })
   })
   /*
