@@ -74,7 +74,7 @@ class Suite
     if item instanceof Suite
       # The item is a Suite. Tell it to build it's own session, so we can
       # combine it with ours.
-      item_session = item._build_session befores, before_eachs, after_eachs
+      item_session = item._build_session befores[..], before_eachs[..], after_eachs[..]
       
       if item_session.length > 0
         # If the item_session has any items in it, then it will have appended
