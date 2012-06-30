@@ -87,3 +87,73 @@ describe 'Suite', ->
         it 'it should return [test, after_each, test, after_each]', ->
           result = suite._build_session()
           result.should.eql([test_a, after_each_a, test_b, after_each_a])
+      
+    describe 'With suites', ->
+      # TODO: Add in depth suite in suite tests.
+  
+  describe '#add_suite()', ->
+    suite = null
+    
+    before_each ->
+      suite = new Suite()
+    
+    it 'should append the suite to the stack', ->
+      new_suite = new Suite()
+      suite.add_suite new_suite
+      suite._tests_and_suites.should.eql([new_suite])
+  
+  describe '#add_test()', ->
+    suite = new_test = null
+    
+    before_each ->
+      suite = new Suite()
+      new_test = new Test()
+    
+    it 'should append the test to the stack', ->
+      suite.add_test new_test
+      suite._tests_and_suites.should.eql([new_test])
+  
+  describe '#add_after()', ->
+    suite = runner = null
+    
+    before_each ->
+      suite = new Suite()
+      runner = new Runner()
+    
+    it 'should append the runner to the stack', ->
+      suite.add_after runner
+      suite._afters.should.eql([runner])
+  
+  describe '#add_after_eachs()', ->
+    suite = runner = null
+    
+    before_each ->
+      suite = new Suite()
+      runner = new Runner()
+    
+    it 'should append the runner to the stack', ->
+      suite.add_after_each runner
+      suite._after_eachs.should.eql([runner])
+  
+  describe '#add_before()', ->
+    suite = runner = null
+    
+    before_each ->
+      suite = new Suite()
+      runner = new Runner()
+    
+    it 'should append the runner to the stack', ->
+      suite.add_before runner
+      suite._befores.should.eql([runner])
+  
+  describe '#add_before_eachs()', ->
+    suite = runner = null
+    
+    before_each ->
+      suite = new Suite()
+      runner = new Runner()
+    
+    it 'should append the runner to the stack', ->
+      suite.add_before_each runner
+      suite._before_eachs.should.eql([runner])
+    
