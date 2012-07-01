@@ -101,6 +101,23 @@ class Suite
     return @_build_session befores, before_eachs, after_eachs,
       session, ++index
   
+  # (session, callback) -> undefined
+  _run_session: (session, callback, index=0) ->
+    item = session[index]
+    
+    if not item?
+      # Currently we do not have reporting implemented, so we just need to
+      # call the callback if we're at the end of our session.
+      callback()
+    
+    item_callback = () ->
+      if not item instanceof Test
+        # If the item was a Runner (not a Test) then it was a before/after/etc
+        # Here we will check if the result of the execution is a failure,
+        # and for before's/after's/etc, 
+    
+    item.run item_callback
+  
   # (runner) -> undefined
   #
   # Params:
