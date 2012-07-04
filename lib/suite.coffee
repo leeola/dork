@@ -5,6 +5,7 @@
 # MIT Licensed
 #
 {Runner} = require './runner'
+{Test} = require './test'
 
 
 
@@ -41,7 +42,7 @@ class Suite
     item = @_tests_and_suites[index]
     
     if not item?
-      @_run_runners @_afters callback
+      @_run_runners @_afters, callback
       return
     
     befores_callback = (reports) ->
@@ -49,7 +50,7 @@ class Suite
       item.run test_callback
     
     test_callback = (report) =>
-      @_run_runners after_eachs
+      @_run_runners after_eachs, after_eachs_callback
     
     after_eachs_callback = (report) =>
       @_run callback, befores, before_eachs, after_eachs, ++index
@@ -74,7 +75,7 @@ class Suite
     
     runner.run (report) ->
       reports.push report
-      @_run_runner runners, callback, ++index, reports
+      @_run_runners runners, callback, ++index, reports
   
   # (runner) -> undefined
   #
@@ -151,7 +152,9 @@ class Suite
   #
   # Desc:
   #   Run all the tests found in this suite, and any suites added to this.
-  run: (callback) ->
+  run: (callback=->) ->
+    @_run (reports) ->
+      callback()
 
 
 
