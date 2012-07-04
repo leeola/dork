@@ -30,93 +30,51 @@ class Suite
     # A list of suites and test runners.
     @_tests_and_suites = []
   
-  # ([befores, before_eachs, after_eachs, [session, index]]) -> Array
-  #
-  # Params:
-  #   befores: A list of before runners.
-  #   before_eachs: A list of before_each runners.
-  #   after_eachs: A list of after_each runners.
-  #   session: Optional. A list containing the built session. This object is
-  #     recursively modified and eventually returned.
-  #   index: Optiona. The index of `@_tests_and_suites` to use.
-  #
-  # Returns:
-  #   A list containing runnables. The runnavbles are in before/test/after
-  #   order, containing all the tests found in any added suites, along with
-  #   the before_eachs and after_eachs from each suite.
-  #
-  # Desc:
-  #   Build a list of runnables which can be passed to `@_run_session()`.
-  #   This is a recursive method.
-  _build_session: (befores=[], before_eachs=[], after_eachs=[], session=[], index=0) ->
-    # If we are on the first iteration, combine the given pre/post hooks
-    # with this suite's pre/post hooks.
+  # (callback) -> undefined
+  _run: (callback, befores=[], before_eachs=[], after_eachs=[], index=0) =>
+    
     if index is 0
       befores.push @_befores...
       before_eachs.push @_before_eachs...
-      # Note that the after_each's need to be added to the *beginning*
-      # of the list. This allows the following design..
-      # Their Befires > Our Befores > Test < Our Afters < Their Afters
-      after_eachs[...0] = @_after_eachs
+      after_eachs.push @_after_eachs...
     
-    # The test/suite we're working on in this iteration.
     item = @_tests_and_suites[index]
     
-    # If the item is undefined, we're at the end of the tests_and_suites,
-    # so we'll want to return out of this iteration.
     if not item?
-      # If we had at least one test in this suite, or any subsuites, then
-      # we want to append our `@_afters` to the session.
-      if session.length > 0
-        session.push @_afters...
-      return session
+      @_run_runners @_afters callback
+      return
     
-    if item instanceof Suite
-      # The item is a Suite. Tell it to build it's own session, so we can
-      # combine it with ours.
-      item_session = item._build_session befores[..], before_eachs[..], after_eachs[..]
-      
-      if item_session.length > 0
-        # If the item_session has any items in it, then it will have appended
-        # our before's. Since these can only execute once, we want to set
-        # it to a new list.
-        befores = []
-        # Now combine the sessions.
-        session.push item_session...
+    befores_callback = (reports) ->
+      befores = []
+      item.run test_callback
+    
+    test_callback = (report) =>
+      @_run_runners after_eachs
+    
+    after_eachs_callback = (report) =>
+      @_run callback, befores, before_eachs, after_eachs, ++index
+    
+    suite_callback = (reports) =>
+      @_run callback, befores, before_eachs, after_eachs, ++index
+    
+    if item instanceof Test
+      runners = []
+      runners.push befores...
+      runners.push before_eachs...
+      @_run_runners runners, befores_callback
     else
-      # The item is a test.
-      
-      if befores.length > 0
-        # Since this is a test, and we have befores, append the befores to
-        # our session, so they're on the session before we add our test.
-        session.push befores...
-        befores = []
-      
-      # Append our item, wrapped in before_eachs and after_eachs
-      session.push before_eachs...
-      session.push item
-      session.push after_eachs...
-    
-    # Return our iteration.
-    return @_build_session befores, before_eachs, after_eachs,
-      session, ++index
+      @_run suite_callback, ++index, befores[..], before_eachs[..], after_eachs[..]
   
-  # (session, callback) -> undefined
-  _run_session: (session, callback, index=0) ->
-    item = session[index]
+  _run_runners: (runners, callback, index=0, reports=[]) ->
+    runner = runners[index]
     
-    if not item?
-      # Currently we do not have reporting implemented, so we just need to
-      # call the callback if we're at the end of our session.
-      callback()
+    if not runner?
+      callback reports
+      return
     
-    item_callback = () ->
-      if not item instanceof Test
-        # If the item was a Runner (not a Test) then it was a before/after/etc
-        # Here we will check if the result of the execution is a failure,
-        # and for before's/after's/etc, 
-    
-    item.run item_callback
+    runner.run (report) ->
+      reports.push report
+      @_run_runner runners, callback, ++index, reports
   
   # (runner) -> undefined
   #
