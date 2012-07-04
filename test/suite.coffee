@@ -87,4 +87,29 @@ describe 'Suite', ->
     it 'should append the runner to the stack', ->
       suite.add_before_each runner
       suite._before_eachs.should.eql([runner])
+
+# We're going to try a different approach here to structuring the tests.
+# Please bear with us.
+describe 'A suite', ->
+  {Suite} = require '../lib/suite'
+  {Runner} = require '../lib/runner'
+  {Test} = require '../lib/test'
+  suite = null
+  
+  before_each ->
+    suite = new Suite()
+  
+  describe 'with two tests', ->
+    test_count_a = test_count_b = null
     
+    before_each ->
+      test_count_a = 0
+      test_count_b = 0
+      
+      suite.add_test new Test -> test_count_a += 1
+      suite.add_test new Test -> test_count_b += 1
+    
+    it 'should call each test once when run', ->
+      suite.run()
+      test_count_a.should.equal(1)
+      test_count_b.should.equal(1)
