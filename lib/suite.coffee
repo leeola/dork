@@ -64,16 +64,17 @@ class Suite
       runners.push before_eachs...
       @_run_runners runners, before_alls_callback
     else
-      item._run suite_callback, before_alls[..], before_eachs[..], after_eachs[..]
+      item._run suite_callback, before_alls[..],
+        before_eachs[..], after_eachs[..]
   
-  _run_runners: (runners, callback, index=0, reports=[]) ->
+  _run_runners: (runners, callback, index=0, reports=[]) =>
     runner = runners[index]
     
     if not runner?
       callback reports
       return
     
-    runner.run (report) ->
+    runner.run (report) =>
       reports.push report
       @_run_runners runners, callback, ++index, reports
   

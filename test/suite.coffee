@@ -95,10 +95,13 @@ describe 'A suite', ->
   {Runner} = require '../lib/runner'
   {Test} = require '../lib/test'
   suite = null
+  run_log = null
   
   before_each ->
+    run_log = []
     suite = new Suite()
   
+  # A suite
   describe 'with two tests', ->
     test_count_a = test_count_b = null
     
@@ -146,4 +149,25 @@ describe 'A suite', ->
           test_count_a.should.equal(0)
           test_count_b.should.equal(0)
           test_count_c.should.equal(1)
-        
+  
+  describe 'with a before_all', ->
+    
+    before_each ->
+      suite.add_before_all new Runner -> run_log.push 'suite.before_all'
+    
+    it 'should not be run with no tests', ->
+      suite.run()
+      run_log.should.eql([])
+    
+    # A suite
+    # with a before_all
+    describe 'and a test', ->
+      before_each ->
+        suite.add_test new Test -> run_log.push 'suite.test'
+      
+      it 'should run before_all then test', ->
+        suite.run()
+        run_log.should.eql([
+          'suite.before_all'
+          'suite.test'
+        ])
