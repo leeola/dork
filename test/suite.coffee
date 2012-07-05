@@ -105,11 +105,45 @@ describe 'A suite', ->
     before_each ->
       test_count_a = 0
       test_count_b = 0
-      
       suite.add_test new Test -> test_count_a += 1
       suite.add_test new Test -> test_count_b += 1
     
-    it 'should call each test once when run', ->
+    it 'should run all tests when suite is run', ->
       suite.run()
       test_count_a.should.equal(1)
       test_count_b.should.equal(1)
+    
+    # with two tests
+    describe 'and a subsuite', ->
+      subsuite = null
+      
+      before_each ->
+        subsuite = new Suite()
+        suite.add_suite subsuite
+      
+      it 'should run all tests when suite is run', ->
+        suite.run()
+        test_count_a.should.equal(1)
+        test_count_b.should.equal(1)
+      
+      # with two tests
+      # and a subsuite
+      describe 'with a test', ->
+        test_count_c = null
+        
+        before_each ->
+          test_count_c = 0
+          subsuite.add_test new Test -> test_count_c += 1
+        
+        it 'should run all tests when suite is run', ->
+          suite.run()
+          test_count_a.should.equal(1)
+          test_count_b.should.equal(1)
+          test_count_c.should.equal(1)
+        
+        it 'should run only the subsuite test when subsuite is run', ->
+          subsuite.run()
+          test_count_a.should.equal(0)
+          test_count_b.should.equal(0)
+          test_count_c.should.equal(1)
+        
