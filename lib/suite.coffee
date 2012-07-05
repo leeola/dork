@@ -23,48 +23,48 @@ class Suite
   #   Initialize the instance variables.
   constructor: (@description, @location) ->
     # Lists of runners that will be executed before/after tests.
-    @_befores = []
+    @_before_alls = []
     @_before_eachs = []
-    @_afters = []
+    @_after_alls = []
     @_after_eachs = []
     
     # A list of suites and test runners.
     @_tests_and_suites = []
   
   # (callback) -> undefined
-  _run: (callback, befores=[], before_eachs=[], after_eachs=[], index=0) =>
+  _run: (callback, before_alls=[], before_eachs=[], after_eachs=[], index=0) =>
     
     if index is 0
-      befores.push @_befores...
+      before_alls.push @_before_alls...
       before_eachs.push @_before_eachs...
       after_eachs.push @_after_eachs...
     
     item = @_tests_and_suites[index]
     
     if not item?
-      @_run_runners @_afters, callback
+      @_run_runners @_after_alls, callback
       return
     
-    befores_callback = (reports) ->
-      befores = []
+    before_alls_callback = (reports) ->
+      before_alls = []
       item.run test_callback
     
     test_callback = (report) =>
       @_run_runners after_eachs, after_eachs_callback
     
     after_eachs_callback = (report) =>
-      @_run callback, befores, before_eachs, after_eachs, ++index
+      @_run callback, before_alls, before_eachs, after_eachs, ++index
     
     suite_callback = (reports) =>
-      @_run callback, befores, before_eachs, after_eachs, ++index
+      @_run callback, before_alls, before_eachs, after_eachs, ++index
     
     if item instanceof Test
       runners = []
-      runners.push befores...
+      runners.push before_alls...
       runners.push before_eachs...
-      @_run_runners runners, befores_callback
+      @_run_runners runners, before_alls_callback
     else
-      item._run suite_callback, befores[..], before_eachs[..], after_eachs[..]
+      item._run suite_callback, before_alls[..], before_eachs[..], after_eachs[..]
   
   _run_runners: (runners, callback, index=0, reports=[]) ->
     runner = runners[index]
@@ -84,10 +84,10 @@ class Suite
   #
   # Desc:
   #   A runner to be called to be called after the last test.
-  add_after: (runner) ->
+  add_after_all: (runner) ->
     if runner instanceof Function
       runner = new Runner runner
-    @_afters.push runner
+    @_after_alls.push runner
   
   # (runner) -> undefined
   #
@@ -108,10 +108,10 @@ class Suite
   #
   # Desc:
   #   A runner to be called to be called before the first test.
-  add_before: (runner) ->
+  add_before_all: (runner) ->
     if runner instanceof Function
       runner = new Runner runner
-    @_befores.push runner
+    @_before_alls.push runner
   
   # (runner) -> undefined
   #

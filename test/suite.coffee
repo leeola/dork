@@ -44,7 +44,7 @@ describe 'Suite', ->
       suite.add_test new_test
       suite._tests_and_suites.should.eql([new_test])
   
-  describe '#add_after()', ->
+  describe '#add_after_all()', ->
     suite = runner = null
     
     before_each ->
@@ -52,8 +52,8 @@ describe 'Suite', ->
       runner = new Runner()
     
     it 'should append the runner to the stack', ->
-      suite.add_after runner
-      suite._afters.should.eql([runner])
+      suite.add_after_all runner
+      suite._after_alls.should.eql([runner])
   
   describe '#add_after_eachs()', ->
     suite = runner = null
@@ -66,7 +66,7 @@ describe 'Suite', ->
       suite.add_after_each runner
       suite._after_eachs.should.eql([runner])
   
-  describe '#add_before()', ->
+  describe '#add_before_all()', ->
     suite = runner = null
     
     before_each ->
@@ -74,8 +74,8 @@ describe 'Suite', ->
       runner = new Runner()
     
     it 'should append the runner to the stack', ->
-      suite.add_before runner
-      suite._befores.should.eql([runner])
+      suite.add_before_all runner
+      suite._before_alls.should.eql([runner])
   
   describe '#add_before_eachs()', ->
     suite = runner = null
