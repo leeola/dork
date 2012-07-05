@@ -64,7 +64,7 @@ class Suite
       runners.push before_eachs...
       @_run_runners runners, befores_callback
     else
-      @_run suite_callback, ++index, befores[..], before_eachs[..], after_eachs[..]
+      item._run suite_callback, befores[..], before_eachs[..], after_eachs[..]
   
   _run_runners: (runners, callback, index=0, reports=[]) ->
     runner = runners[index]
