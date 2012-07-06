@@ -32,7 +32,11 @@ class Suite
     @_tests_and_suites = []
   
   # (callback) -> undefined
-  _run: (callback, before_alls=[], before_eachs=[], after_eachs=[], index=0) =>
+  _run: (callback,
+      before_alls=[], before_eachs=[], after_eachs=[], index=0,
+      report={
+        total_tests: 0
+        }) =>
     
     if index is 0
       before_alls.push @_before_alls...
@@ -42,14 +46,19 @@ class Suite
     item = @_tests_and_suites[index]
     
     if not item?
-      @_run_runners @_after_alls, callback
+      if report.total_tests > 0
+        @_run_runners @_after_alls, callback
+      else
+          callback report
       return
     
     before_alls_callback = (reports) =>
       before_alls = []
       item.run test_callback
     
-    test_callback = (report) =>
+    test_callback = (test_report) =>
+      # We're just faking the report for now.
+      report.total_tests += 1
       @_run_runners after_eachs, after_eachs_callback
     
     after_eachs_callback = (report) =>
@@ -155,7 +164,7 @@ class Suite
   #   Run all the tests found in this suite, and any suites added to this.
   run: (callback=->) ->
     @_run (reports) ->
-      callback()
+      callback reports
 
 
 
