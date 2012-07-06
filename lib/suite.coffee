@@ -5,6 +5,7 @@
 # MIT Licensed
 #
 {Runner} = require './runner'
+{Test} = require './test'
 
 
 
@@ -22,101 +23,73 @@ class Suite
   #   Initialize the instance variables.
   constructor: (@description, @location) ->
     # Lists of runners that will be executed before/after tests.
-    @_befores = []
+    @_before_alls = []
     @_before_eachs = []
-    @_afters = []
+    @_after_alls = []
     @_after_eachs = []
     
     # A list of suites and test runners.
     @_tests_and_suites = []
   
-  # ([befores, before_eachs, after_eachs, [session, index]]) -> Array
-  #
-  # Params:
-  #   befores: A list of before runners.
-  #   before_eachs: A list of before_each runners.
-  #   after_eachs: A list of after_each runners.
-  #   session: Optional. A list containing the built session. This object is
-  #     recursively modified and eventually returned.
-  #   index: Optiona. The index of `@_tests_and_suites` to use.
-  #
-  # Returns:
-  #   A list containing runnables. The runnavbles are in before/test/after
-  #   order, containing all the tests found in any added suites, along with
-  #   the before_eachs and after_eachs from each suite.
-  #
-  # Desc:
-  #   Build a list of runnables which can be passed to `@_run_session()`.
-  #   This is a recursive method.
-  _build_session: (befores=[], before_eachs=[], after_eachs=[], session=[], index=0) ->
-    # If we are on the first iteration, combine the given pre/post hooks
-    # with this suite's pre/post hooks.
+  # (callback) -> undefined
+  _run: (callback,
+      before_alls=[], before_eachs=[], after_eachs=[], index=0,
+      report={
+        total_tests: 0
+        }) =>
+    
     if index is 0
-      befores.push @_befores...
+      before_alls.push @_before_alls...
       before_eachs.push @_before_eachs...
-      # Note that the after_each's need to be added to the *beginning*
-      # of the list. This allows the following design..
-      # Their Befires > Our Befores > Test < Our Afters < Their Afters
       after_eachs[...0] = @_after_eachs
     
-    # The test/suite we're working on in this iteration.
     item = @_tests_and_suites[index]
     
-    # If the item is undefined, we're at the end of the tests_and_suites,
-    # so we'll want to return out of this iteration.
     if not item?
-      # If we had at least one test in this suite, or any subsuites, then
-      # we want to append our `@_afters` to the session.
-      if session.length > 0
-        session.push @_afters...
-      return session
+      if report.total_tests > 0
+        @_run_runners @_after_alls, ->
+          callback report
+      else
+        callback report
+      return
     
-    if item instanceof Suite
-      # The item is a Suite. Tell it to build it's own session, so we can
-      # combine it with ours.
-      item_session = item._build_session befores[..], before_eachs[..], after_eachs[..]
-      
-      if item_session.length > 0
-        # If the item_session has any items in it, then it will have appended
-        # our before's. Since these can only execute once, we want to set
-        # it to a new list.
-        befores = []
-        # Now combine the sessions.
-        session.push item_session...
+    before_alls_callback = (runner_reports) =>
+      before_alls = []
+      item.run test_callback
+    
+    test_callback = (test_report) =>
+      # We're just faking the report for now.
+      report.total_tests += 1
+      @_run_runners after_eachs, after_eachs_callback
+    
+    after_eachs_callback = (runner_reports) =>
+      @_run callback, before_alls, before_eachs, after_eachs, ++index, report
+    
+    suite_callback = (suite_report) =>
+      if suite_report.total_tests > 0
+        before_alls = []
+        report.total_tests += suite_report.total_tests
+      @_run callback, before_alls, before_eachs, after_eachs, ++index, report
+    
+    if item instanceof Test
+      runners = []
+      runners.push before_alls...
+      runners.push before_eachs...
+      @_run_runners runners, before_alls_callback
     else
-      # The item is a test.
-      
-      if befores.length > 0
-        # Since this is a test, and we have befores, append the befores to
-        # our session, so they're on the session before we add our test.
-        session.push befores...
-        befores = []
-      
-      # Append our item, wrapped in before_eachs and after_eachs
-      session.push before_eachs...
-      session.push item
-      session.push after_eachs...
-    
-    # Return our iteration.
-    return @_build_session befores, before_eachs, after_eachs,
-      session, ++index
+      item._run suite_callback, before_alls[..],
+        before_eachs[..], after_eachs[..]
   
-  # (session, callback) -> undefined
-  _run_session: (session, callback, index=0) ->
-    item = session[index]
+  _run_runners: (runners, callback, index=0, reports=[]) =>
+    runner = runners[index]
     
-    if not item?
-      # Currently we do not have reporting implemented, so we just need to
-      # call the callback if we're at the end of our session.
-      callback()
+    if not runner?
+      callback reports
+      return
     
-    item_callback = () ->
-      if not item instanceof Test
-        # If the item was a Runner (not a Test) then it was a before/after/etc
-        # Here we will check if the result of the execution is a failure,
-        # and for before's/after's/etc, 
-    
-    item.run item_callback
+    runner.run (report) =>
+      reports.push report
+      @_run_runners runners, callback, ++index, reports
   
   # (runner) -> undefined
   #
@@ -125,10 +98,10 @@ class Suite
   #
   # Desc:
   #   A runner to be called to be called after the last test.
-  add_after: (runner) ->
+  add_after_all: (runner) ->
     if runner instanceof Function
       runner = new Runner runner
-    @_afters.push runner
+    @_after_alls.push runner
   
   # (runner) -> undefined
   #
@@ -149,10 +122,10 @@ class Suite
   #
   # Desc:
   #   A runner to be called to be called before the first test.
-  add_before: (runner) ->
+  add_before_all: (runner) ->
     if runner instanceof Function
       runner = new Runner runner
-    @_befores.push runner
+    @_before_alls.push runner
   
   # (runner) -> undefined
   #
@@ -193,7 +166,9 @@ class Suite
   #
   # Desc:
   #   Run all the tests found in this suite, and any suites added to this.
-  run: (callback) ->
+  run: (callback=->) ->
+    @_run (reports) ->
+      callback reports
 
 
 
