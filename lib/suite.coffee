@@ -41,18 +41,19 @@ class Suite
     if index is 0
       before_alls.push @_before_alls...
       before_eachs.push @_before_eachs...
-      after_eachs.push @_after_eachs...
+      after_eachs[...0] = @_after_eachs
     
     item = @_tests_and_suites[index]
     
     if not item?
       if report.total_tests > 0
-        @_run_runners @_after_alls, callback
-      else
+        @_run_runners @_after_alls, ->
           callback report
+      else
+        callback report
       return
     
-    before_alls_callback = (reports) =>
+    before_alls_callback = (runner_reports) =>
       before_alls = []
       item.run test_callback
     
@@ -61,11 +62,14 @@ class Suite
       report.total_tests += 1
       @_run_runners after_eachs, after_eachs_callback
     
-    after_eachs_callback = (report) =>
-      @_run callback, before_alls, before_eachs, after_eachs, ++index
+    after_eachs_callback = (runner_reports) =>
+      @_run callback, before_alls, before_eachs, after_eachs, ++index, report
     
-    suite_callback = (reports) =>
-      @_run callback, before_alls, before_eachs, after_eachs, ++index
+    suite_callback = (suite_report) =>
+      if suite_report.total_tests > 0
+        before_alls = []
+        report.total_tests += suite_report.total_tests
+      @_run callback, before_alls, before_eachs, after_eachs, ++index, report
     
     if item instanceof Test
       runners = []
