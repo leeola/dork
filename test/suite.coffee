@@ -150,6 +150,7 @@ describe 'A suite', ->
           test_count_b.should.equal(0)
           test_count_c.should.equal(1)
   
+  # A suite
   describe 'with a before_all', ->
     
     before_each ->
@@ -171,3 +172,55 @@ describe 'A suite', ->
           'suite.before_all'
           'suite.test'
         ])
+    
+    # A suite
+    # with a before_all
+    describe 'and a subsuite', ->
+      subsuite = null
+      before_each ->
+        subsuite = new Suite()
+        suite.add_suite subsuite
+      
+      it 'should not run anything with no tests', ->
+        suite.run()
+        run_log.should.eql([])
+      
+      describe 'with tests', ->
+        before_each ->
+          subsuite.add_test new Test -> run_log.push 'subsuite.test_a'
+          subsuite.add_test new Test -> run_log.push 'subsuite.test_b'
+        
+        it 'should run before_all then the subsuite tests', ->
+          suite.run()
+          run_log.should.eql([
+            'suite.before_all'
+            'subsuite.test_a'
+            'subsuite.test_b'
+          ])
+  
+  # A suite
+  describe 'with a before_each', ->
+    before_each ->
+      suite.add_before_each new Runner -> run_log.push 'suite.before_each'
+    
+    it 'should not be run with no tests', ->
+      suite.run()
+      run_log.should.eql([])
+  
+  # A suite
+  describe 'with an after_all', ->
+    before_each ->
+      suite.add_after_all new Runner -> run_log.push 'suite.after_all'
+    
+    it 'should not be run with no tests', ->
+      suite.run()
+      run_log.should.eql([])
+  
+  # A suite
+  describe 'with an after_each', ->
+    before_each ->
+      suite.add_after_each new Runner -> run_log.push 'suite.after_each'
+    
+    it 'should not be run with no tests', ->
+      suite.run()
+      run_log.should.eql([])
