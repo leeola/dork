@@ -224,3 +224,95 @@ describe 'A suite', ->
     it 'should not be run with no tests', ->
       suite.run()
       run_log.should.eql([])
+
+# This is our catch-all test. Because there are a *lot* of possibilities
+# with this set of tests, we're going to do a bunch of random tests,
+# and one test that does one of everything.
+# A suite
+describe 'A suite with a kitchen sink', ->
+  {Suite} = require '../lib/suite'
+  {Runner} = require '../lib/runner'
+  {Test} = require '../lib/test'
+  run_log = null
+  suite = subsuite = subsubsuite = subsuite_b = null
+  
+  before_each ->
+    run_log = []
+    suite = new Suite()
+    subsuite = new Suite()
+    subsubsuite = new Suite()
+    subsuite_b = new Suite()
+    
+    suite.add_before_all new Runner -> run_log.push 'suite.before_all_a'
+    suite.add_before_all new Runner -> run_log.push 'suite.before_all_b'
+    suite.add_before_each new Runner -> run_log.push 'suite.before_each'
+    suite.add_test new Test -> run_log.push 'suite.test_a'
+    suite.add_test new Test -> run_log.push 'suite.test_b'
+    suite.add_after_each new Runner -> run_log.push 'suite.after_each'
+    suite.add_after_all new Runner -> run_log.push 'suite.after_all'
+    suite.add_suite subsuite
+    suite.add_suite subsuite_b
+    subsuite.add_suite subsubsuite
+    subsuite.add_before_all new Runner -> run_log.push 'subsuite.before_all'
+    subsuite.add_before_each new Runner -> run_log.push 'subsuite.before_each'
+    subsuite.add_test new Test -> run_log.push 'subsuite.test'
+    subsuite.add_after_all new Runner -> run_log.push 'subsuite.after_all'
+    subsuite.add_after_each new Runner -> run_log.push 'subsuite.after_each'
+    subsubsuite.add_test new Test -> run_log.push 'subsubsuite.test'
+    subsuite_b.add_before_all new Runner -> run_log.push 'subsuite_b.before_all'
+  
+  it 'should match the expected result when running suite', ->
+    suite.run()
+    # The following is a handy debugger.
+    #console.log 'run log: '
+    #for log in run_log
+    #  console.log log
+    run_log.should.eql([
+      'suite.before_all_a'
+      'suite.before_all_b'
+      'suite.before_each'
+      'suite.test_a'
+      'suite.after_each'
+      'suite.before_each'
+      'suite.test_b'
+      'suite.after_each'
+      
+      'subsuite.before_all'
+      'suite.before_each'
+      'subsuite.before_each'
+      'subsubsuite.test'
+      'subsuite.after_each'
+      'suite.after_each'
+      
+      'suite.before_each'
+      'subsuite.before_each'
+      'subsuite.test'
+      'subsuite.after_each'
+      'suite.after_each'
+      'subsuite.after_all'
+      'suite.after_all'
+      ])
+  
+  it 'should match the expected result when running subsuite', ->
+    subsuite.run()
+    run_log.should.eql([
+      'subsuite.before_all'
+      'subsuite.before_each'
+      'subsubsuite.test'
+      'subsuite.after_each'
+      
+      'subsuite.before_each'
+      'subsuite.test'
+      'subsuite.after_each'
+      'subsuite.after_all'
+      ])
+  
+  it 'should match the expected result when running subsubsuite', ->
+    subsubsuite.run()
+    run_log.should.eql([
+      'subsubsuite.test'
+      ])
+  
+  it 'should match the expected result when running subsuite_b', ->
+    subsuite_b.run()
+    run_log.should.eql([])
