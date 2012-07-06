@@ -45,7 +45,7 @@ class Suite
       @_run_runners @_after_alls, callback
       return
     
-    before_alls_callback = (reports) ->
+    before_alls_callback = (reports) =>
       before_alls = []
       item.run test_callback
     
