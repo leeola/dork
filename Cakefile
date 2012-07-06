@@ -129,7 +129,7 @@ task 'test:full', 'build test, then run it', ->
 task 'test:nobuild', 'just run the tests, don\'t build anything', ->
   bork_task.seq (done) ->
     console.log 'test start'
-    exec MOCHA_BIN, ['./test'], ->
+    exec MOCHA_BIN, ['./build/test'], ->
       console.log 'test done'
       done()
 
