@@ -30,6 +30,9 @@ class Suite
     
     # A list of suites and test runners.
     @_tests_and_suites = []
+    
+    # The reporters this suite will report to.
+    @_reporters = []
   
   # (callback, before_alls=[], before_eachs=[], after_eachs=[],
   #   index=0, report={}) -> undefined
@@ -179,6 +182,16 @@ class Suite
     if runner instanceof Function
       runner = new Runner runner
     @_before_eachs.push runner
+  
+  # (reporters) -> undefined
+  #
+  # Params:
+  #   reporter: The reporter to add.
+  #
+  # Desc:
+  #   Add a suite to this suite.
+  add_reporter: (reporter) ->
+    @_reporters.push reporter
   
   # (suite) -> undefined
   #
