@@ -4,14 +4,16 @@
 # Copyright (c) 2012 Lee Olayvar <leeolayvar@gmail.com>
 # MIT Licensed
 #
+emighter = require 'emighter'
 {Runner} = require './runner'
 {Test} = require './test'
 
 
 
+
 # Desc:
 #   A Suite represents a collection of tests.
-class Suite
+class Suite extends emighter.Emighter
   
   # (@description, @location) -> undefined
   #
@@ -31,86 +33,101 @@ class Suite
     # A list of suites and test runners.
     @_tests_and_suites = []
     
-    # The reporters this suite will report to.
-    @_reporters = []
+    @_session = undefined
+    
+    # Don't forget to call our super!
+    super()
   
-  # (callback, before_alls=[], before_eachs=[], after_eachs=[],
-  #   index=0, report={}) -> undefined
-  #
-  # Params:
-  #   callback: A function called when the entirty of the suite is done.
-  #   before_alls: Optional. A list of before_alls to start with.
-  #   before_eachs: Optional. A list of before_eachs to start with.
-  #   after_eachs: Optional. A list of after_eachs to start with.
-  #   index: Optional. The index of @_tests_and_suites this recursive
-  #     iteration is currently at.
-  #   report: Optional. The compiled report from any tests and suites ran.
-  #
-  # Desc:
-  #   An internal function which iterates over @_tests_and_suites. It includes
-  #   optional arguments for parental pre/post hooks as well.
-  _run: (callback, before_alls=[], before_eachs=[], after_eachs=[], index=0,
-        report={
-          total_tests: 0
-        }) =>
-    
-    # If we're at the start of the iterations, append @this's pre/post
-    # hook runners to the supplied argument pre/post runners.
-    if index is 0
-      before_alls.push @_before_alls...
-      before_eachs.push @_before_eachs...
-      # Note that the after_each's need to be added to the *beginning*
-      # of the list. This allows the following design..
-      # Their Befores > Our Befores > Test < Our Afters < Their Afters
-      after_eachs[...0] = @_after_eachs
-    
-    # Our test or suite
-    item = @_tests_and_suites[index]
-    
-    # If item does not exist, callback
-    if not item?
-      # If we have one or more tests, run the after_all runners, and
-      # then callback.
-      if report.total_tests > 0
-        @_run_runners @_after_alls, ->
-          callback report
+  _foo: (meta, done) =>
+  _bar: (meta, done) ->
+  
+  _on_child_before: (meta, done) =>
+    ###
+    @emit 'before', [], =>
+      console.log "#{@description}: Child befores---------------"
+      if @session.completed_tests is 0
+        @_run_before_alls()
       else
-        callback report
-      return
+        @_run_before_eachs()
+    ###
+    @_run_befores meta, ->
+      console.log "Uhh... #{JSON.stringify done}"
+      console.log 'ahh, got it. sort of.'; done()
+  
+  _on_child_after: (meta, done) =>
+    @emit 'after', =>
+  
+  _on_child_complete: (meta, done) =>
+    console.log 'Child complete?'
+    @_next()
+  
+  _complete: () =>
+    console.log 'Complete.'
+    @emit 'complete', =>
+  
+  _run_afters: (meta, callback) =>
+    console.log "#{@description}: Emitting after"
+    @emit 'after', [meta], =>
+      @_run_runners @_after_eachs, =>
+        callback()
+  
+  _run_befores: (meta, callback) =>
+    console.log "#{@description}: Emitting before"
+    @emit 'before', [meta], =>
+      console.log "#{@description}: Emitting before done"
+      if @session.ran_before_alls
+        @_run_runners @_before_eachs, =>
+          callback()
+      else
+        @session.ran_before_alls = true
+        @_run_runners @_before_alls, =>
+          @_run_runners @_before_eachs, =>
+            callback()
+  
+  _run_test: (test, callback) =>
+    @_run_befores @session.meta, =>
+      test.run =>
+        @_run_afters @session.meta, =>
+          callback()
+  
+  _next: =>
+    @session.item = @_tests_and_suites[++@session.index]
     
-    # Called after @_run_runners is finished iterating through befores.
-    # Note that these are both `before_alls` and `before_eachs`
-    befores_callback = (runner_reports) =>
-      # Since we just ran before_alls, empty it if we need to.
-      if before_alls.length > 0
-        before_alls = []
-      item.run test_callback
-    
-    # Called when our test is done.
-    test_callback = (test_report) =>
-      # We're just faking the report for now.
-      report.total_tests += 1
-      @_run_runners after_eachs, after_eachs_callback
-    
-    # Called after `@_run_runners` is finished iterating through `after_eachs`
-    after_eachs_callback = (runner_reports) =>
-      @_run callback, before_alls, before_eachs, after_eachs, ++index, report
-    
-    # Called when item is a suite, and `item._run` has finished.
-    suite_callback = (suite_report) =>
-      if suite_report.total_tests > 0
-        before_alls = []
-        report.total_tests += suite_report.total_tests
-      @_run callback, before_alls, before_eachs, after_eachs, ++index, report
-    
-    if item instanceof Test
-      befores = []
-      befores.push before_alls...
-      befores.push before_eachs...
-      @_run_runners befores, befores_callback
+    if not @session.item?
+      if @session.test_reports > 0
+        @_run_after_alls()
+      else
+        @_complete()
+      
+    else if @session.item instanceof Suite
+      @_run_suite @session.item
+      
     else
-      item._run suite_callback, before_alls[..],
-        before_eachs[..], after_eachs[..]
+      @_run_test @session.item, @_next
+  
+  _run_after_alls: =>
+    @_run_runners @_after_alls, ->
+      @_complete()
+  
+  _run_suite: (suite) =>
+    # Note that due to a bug in coffeescript, we need to explicitly tell
+    # emighter that we want to use a callback.
+    # See: https://github.com/jashkenas/coffee-script/issues/2489
+    suite.on 'before', @_on_child_before, callback: true
+    suite.on 'after', @_on_child_after, callback: true
+    suite.on 'complete', @_on_child_complete
+    suite._run()
+  
+  _run: =>
+    console.log "-----------------Lets see, #{@_foo.length}"
+    console.log "-----------------Lets see, #{@_bar.length}"
+    @session =
+      ran_before_alls: false
+      index: -1
+      meta:
+        description: @description
+    
+    @_next()
   
   # (runners, callback, index=0, reports=[]) -> undefined
   #
@@ -211,6 +228,8 @@ class Suite
   # Desc:
   #   Add a test to this suite.
   add_test: (test) ->
+    if test instanceof Function
+      test = new Test test
     @_tests_and_suites.push test
   
   # (callback) -> undefined
@@ -226,5 +245,5 @@ class Suite
 
 
 
-exports.create = (description, location) -> new Suite description, location
+exports.create = (args...) -> new Suite args...
 exports.Suite = Suite

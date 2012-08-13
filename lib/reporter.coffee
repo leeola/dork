@@ -8,7 +8,12 @@
 
 
 class Reporter
-  constructor: ->
+  constructor: (suite) ->
+    suite.on 'pre', @_pre
+    suite.on 'test_start', @_pre
+    suite.on 'test_end', @_test_end
+    suite.on 'suite', @_pre
+    suite.on 'post', @_pre
   
   report: ->
 
