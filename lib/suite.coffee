@@ -53,23 +53,21 @@ class Suite extends emighter.Emighter
     @_run_afters meta, -> done()
   
   _on_child_complete: (meta, done) =>
-    console.log 'Child complete?'
     @_next()
   
+  _on_child_test: (meta, done) =>
+    #done()
+  
   _complete: () =>
-    console.log 'Complete.'
-    @emit 'complete', =>
+    @emit 'complete'
   
   _run_afters: (meta, callback) =>
-    console.log "#{@description}: Emitting after"
     @emit 'after', [meta], =>
       @_run_runners @_after_eachs, =>
         callback()
   
   _run_befores: (meta, callback) =>
-    console.log "#{@description}: Emitting before"
     @emit 'before', [meta], =>
-      console.log "#{@description}: Emitting before done"
       if @session.ran_before_alls
         @_run_runners @_before_eachs, =>
           callback()
@@ -110,7 +108,8 @@ class Suite extends emighter.Emighter
     # See: https://github.com/jashkenas/coffee-script/issues/2489
     suite.on 'before', @_on_child_before, callback: true
     suite.on 'after', @_on_child_after, callback: true
-    suite.on 'complete', @_on_child_complete
+    suite.on 'test', @_on_child_test, callback: true
+    suite.on 'complete', @_on_child_complete, callback: true
     suite._run()
   
   _run: =>
