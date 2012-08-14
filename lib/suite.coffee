@@ -58,13 +58,13 @@ class Suite extends emighter.Emighter
       @emit 'complete'
   
   _run_after_alls: (callback) =>
-    @emit 'after_all', [], =>
-      @_run_runners @_after_alls, ->
+    @_run_runners @_after_alls, =>
+      @emit 'after_all', [], =>
         callback()
   
   _run_after_eachs: (meta, callback) =>
-    @emit 'after_each', [meta], =>
-      @_run_runners @_after_eachs, =>
+    @_run_runners @_after_eachs, =>
+      @emit 'after_each', [meta], =>
         callback()
   
   _run_before_alls: (meta, callback) =>
