@@ -38,9 +38,6 @@ class Suite extends emighter.Emighter
     # Don't forget to call our super!
     super()
   
-  _foo: (meta, done) =>
-  _bar: (meta, done) ->
-  
   _on_child_before: (meta, done) =>
     ###
     @emit 'before', [], =>
@@ -50,12 +47,10 @@ class Suite extends emighter.Emighter
       else
         @_run_before_eachs()
     ###
-    @_run_befores meta, ->
-      console.log "Uhh... #{JSON.stringify done}"
-      console.log 'ahh, got it. sort of.'; done()
+    @_run_befores meta, -> done()
   
   _on_child_after: (meta, done) =>
-    @emit 'after', =>
+    @_run_afters meta, -> done()
   
   _on_child_complete: (meta, done) =>
     console.log 'Child complete?'
@@ -119,8 +114,6 @@ class Suite extends emighter.Emighter
     suite._run()
   
   _run: =>
-    console.log "-----------------Lets see, #{@_foo.length}"
-    console.log "-----------------Lets see, #{@_bar.length}"
     @session =
       ran_before_alls: false
       index: -1
