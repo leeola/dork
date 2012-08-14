@@ -38,50 +38,66 @@ class Suite extends emighter.Emighter
     # Don't forget to call our super!
     super()
   
-  _on_child_before: (meta, done) =>
-    ###
-    @emit 'before', [], =>
-      console.log "#{@description}: Child befores---------------"
-      if @session.completed_tests is 0
-        @_run_before_alls()
-      else
-        @_run_before_eachs()
-    ###
-    @_run_befores meta, -> done()
+  _on_child_before_all: (meta, done) =>
+    @_run_before_alls meta, -> done()
   
-  _on_child_after: (meta, done) =>
-    @_run_afters meta, -> done()
+  _on_child_before_each: (meta, done) =>
+    @_run_before_eachs meta, -> done()
+  
+  _on_child_after_each: (meta, done) =>
+    @_run_after_eachs meta, -> done()
   
   _on_child_complete: (meta, done) =>
     @_next()
   
   _on_child_test: (meta, done) =>
-    #done()
+    done()
   
   _complete: () =>
-    @emit 'complete'
+    @_run_after_alls =>
+      @emit 'complete'
   
-  _run_afters: (meta, callback) =>
-    @emit 'after', [meta], =>
+  _run_after_alls: (callback) =>
+    @emit 'after_all', [], =>
+      @_run_runners @_after_alls, ->
+        callback()
+  
+  _run_after_eachs: (meta, callback) =>
+    @emit 'after_each', [meta], =>
       @_run_runners @_after_eachs, =>
         callback()
   
-  _run_befores: (meta, callback) =>
-    @emit 'before', [meta], =>
-      if @session.ran_before_alls
-        @_run_runners @_before_eachs, =>
-          callback()
-      else
+  _run_before_alls: (meta, callback) =>
+    @emit 'before_all', [meta], =>
+      if not @session.ran_before_alls
         @session.ran_before_alls = true
         @_run_runners @_before_alls, =>
-          @_run_runners @_before_eachs, =>
-            callback()
+          callback()
+      else
+        callback()
+  
+  _run_before_eachs: (meta, callback) =>
+    @emit 'before_each', [meta], =>
+      @_run_runners @_before_eachs, =>
+        callback()
   
   _run_test: (test, callback) =>
-    @_run_befores @session.meta, =>
-      test.run =>
-        @_run_afters @session.meta, =>
-          callback()
+    @_run_before_alls @session.meta, =>
+      @_run_before_eachs @session.meta, =>
+        test.run =>
+          @_run_after_eachs @session.meta, =>
+            callback()
+  
+  _run_suite: (suite) =>
+    # Note that due to a bug in coffeescript, we need to explicitly tell
+    # emighter that we want to use a callback.
+    # See: https://github.com/jashkenas/coffee-script/issues/2489
+    suite.on 'before_all', @_on_child_before_all, callback: true
+    suite.on 'before_each', @_on_child_before_each, callback: true
+    suite.on 'after_each', @_on_child_after_each, callback: true
+    suite.on 'test', @_on_child_test, callback: true
+    suite.on 'complete', @_on_child_complete, callback: true
+    suite._run()
   
   _next: =>
     @session.item = @_tests_and_suites[++@session.index]
@@ -97,20 +113,6 @@ class Suite extends emighter.Emighter
       
     else
       @_run_test @session.item, @_next
-  
-  _run_after_alls: =>
-    @_run_runners @_after_alls, ->
-      @_complete()
-  
-  _run_suite: (suite) =>
-    # Note that due to a bug in coffeescript, we need to explicitly tell
-    # emighter that we want to use a callback.
-    # See: https://github.com/jashkenas/coffee-script/issues/2489
-    suite.on 'before', @_on_child_before, callback: true
-    suite.on 'after', @_on_child_after, callback: true
-    suite.on 'test', @_on_child_test, callback: true
-    suite.on 'complete', @_on_child_complete, callback: true
-    suite._run()
   
   _run: =>
     @session =
