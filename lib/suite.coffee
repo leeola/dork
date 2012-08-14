@@ -58,7 +58,11 @@ class Suite extends emighter.Emighter
       @emit 'complete'
   
   _run_after_alls: (callback) =>
-    @_run_runners @_after_alls, =>
+    if @session.ran_a_test
+      @_run_runners @_after_alls, =>
+        @emit 'after_all', [], =>
+          callback()
+    else
       @emit 'after_all', [], =>
         callback()
   
@@ -69,8 +73,8 @@ class Suite extends emighter.Emighter
   
   _run_before_alls: (meta, callback) =>
     @emit 'before_all', [meta], =>
-      if not @session.ran_before_alls
-        @session.ran_before_alls = true
+      if not @session.ran_a_test
+        @session.ran_a_test = true
         @_run_runners @_before_alls, =>
           callback()
       else
@@ -116,7 +120,7 @@ class Suite extends emighter.Emighter
   
   _run: =>
     @session =
-      ran_before_alls: false
+      ran_a_test: false
       index: -1
       meta:
         description: @description
