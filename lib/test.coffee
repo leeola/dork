@@ -27,6 +27,15 @@ class Test extends Runner
   # Desc:
   #   Initialize the data for this object instance.
   constructor: (@_description, @_location, @_fn, @_timeout) ->
+    if @_description instanceof Function
+      @_fn = @_description
+      @_timeout = @_location
+      @_description = ''
+      @_location = ''
+    else if @_location instanceof Function
+      @_timeout = @_fn
+      @_fn = @_location
+      @_location = ''
     super @_fn, @_timeout
 
 

@@ -47,7 +47,7 @@ describe('index', function () {
     index_a.foo = 'foo'
     
     // This foo test isn't really needed, but i like it anyway..
-    index_a.foo.should.equal(index_b.foo)
+    index_a.foo.should.equal('foo')
     index_a.should.equal(index_b)
   })
 })
