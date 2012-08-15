@@ -48,10 +48,8 @@ class Suite extends emighter.Emighter
     @_run_after_eachs meta, -> done()
   
   _on_child_complete: (meta, done) =>
+    @emit 'suite_end'
     @_next()
-  
-  _on_child_test: (meta, done) =>
-    done()
   
   _complete: () =>
     @_run_after_alls =>
@@ -88,7 +86,9 @@ class Suite extends emighter.Emighter
   _run_test: (test, callback) =>
     @_run_before_alls @session.meta, =>
       @_run_before_eachs @session.meta, =>
+        @emit 'test_start'
         test.run =>
+          @emit 'test_end'
           @_run_after_eachs @session.meta, =>
             callback()
   
@@ -99,8 +99,18 @@ class Suite extends emighter.Emighter
     suite.on 'before_all', @_on_child_before_all, callback: true
     suite.on 'before_each', @_on_child_before_each, callback: true
     suite.on 'after_each', @_on_child_after_each, callback: true
-    suite.on 'test', @_on_child_test, callback: true
     suite.on 'complete', @_on_child_complete, callback: true
+    
+    # Now set up some forwarding for events.
+    suite.on 'test', => @emit 'test'
+    suite.on 'test_start', => @emit 'test_start'
+    suite.on 'test_end', => @emit 'test_end'
+    suite.on 'suite', => @emit 'suite'
+    suite.on 'suite_start', => @emit 'suite_start'
+    suite.on 'suite_end', => @emit 'suite_end'
+    
+    # And emit our own suite start!
+    @emit 'suite_start'
     suite._run()
   
   _next: =>
