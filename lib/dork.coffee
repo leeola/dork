@@ -4,6 +4,7 @@
 # Copyright (c) 2012 Lee Olayvar <leeolayvar@gmail.com>
 # MIT Licensed
 #
+utils = require './utils'
 {Suite} = require './suite'
 {Test} = require './test'
 {StdoutReporter} = require './reporters'
@@ -50,8 +51,6 @@ class Dork
     @_options.global = value
   
   _option_reporters: (user_reporters) ->
-    indexOf = (list, target) -> return i for v, i in list when v is target
-    
     if @_options.reporters?
       rem_reporters = @_options.reporters[..]
       new_reporters = []
@@ -59,7 +58,7 @@ class Dork
         if not (reporter in @_options.reporters)
           new_reporters.push reporter
         else
-          index = indexOf rem_reporters, reporter
+          index = utils.index_of rem_reporters, reporter
           rem_reporters.splice index, 0
     else
       rem_reporters = []
