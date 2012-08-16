@@ -10,11 +10,8 @@
 
 class Reporter
   constructor: (suite) ->
-    suite.on 'test_start', @_test_start
-    suite.on 'test_end', @_test_end
-    suite.on 'suite_start', @_suite_start
-    suite.on 'suite_end', @_suite_end
-    suite.on 'complete', @_complete
+    if suite?
+      @listen suite
   
   _complete: =>
   
@@ -25,6 +22,22 @@ class Reporter
   _suite_start: =>
   
   _suite_end: =>
+  
+  end: (suite) ->
+    suite.remove 'test_start', @_test_start
+    suite.remove 'test_end', @_test_end
+    suite.remove 'suite_start', @_suite_start
+    suite.remove 'suite_end', @_suite_end
+    suite.remove 'complete', @_complete
+  
+  listen: (suite) ->
+    suite.on 'test_start', @_test_start
+    suite.on 'test_end', @_test_end
+    suite.on 'suite_start', @_suite_start
+    suite.on 'suite_end', @_suite_end
+    suite.on 'complete', @_complete
+  
+  report: (args...) -> @listen args...
 
 
 
