@@ -6,14 +6,14 @@
 #
 {Suite} = require './suite'
 {Test} = require './test'
-{StdoutReporter} = require
+{StdoutReporter} = require './reporters'
 
 
 
 
 DEFAULT_OPTIONS =
   global: false
-  #reporters: [StdoutReporter]
+  reporters: [new StdoutReporter()]
 
 
 
@@ -49,27 +49,61 @@ class Dork
                 global.it = undefined
     @_options.global = value
   
-  after_all: =>
+  _option_reporters: (user_reporters) ->
+    indexOf = (list, target) -> return i for v, i in list when v is target
+    
+    if @_options.reporters?
+      rem_reporters = @_options.reporters[..]
+      new_reporters = []
+      for reporter in user_reporters
+        if not (reporter in @_options.reporters)
+          new_reporters.push reporter
+        else
+          index = indexOf rem_reporters, reporter
+          rem_reporters.splice index, 0
+    else
+      rem_reporters = []
+      new_reporters = user_reporters
+    
+    # Make the new reporters listen to the base suite.
+    for reporter in new_reporters
+      console.log 'Listening to reporter!'
+      reporter.listen @_base_suite
+    
+    # And remove the old reporters.
+    for reporter in rem_reporters
+      reporter.remove @_base_suite
   
-  after_each: =>
+  after_all: (fn) =>
+    @_active_suite.add_after_all = new Runner fn
   
-  before_all: =>
+  after_each: (fn) =>
+    @_active_suite.add_after_each = new Runner fn
   
-  before_each: =>
+  before_all: (fn) =>
+    @_active_suite.add_before_all = new Runner fn
+  
+  before_each: (fn) =>
+    @_active_suite.add_before_each = new Runner fn
   
   describe: (description, context_fn) =>
-    @_active_suite = new Suite description
+    old_suite = @_active_suite
+    new_suite = new Suite description
+    @_active_suite.add_suite new_suite
     
+    @_active_suite = new_suite
     context_fn()
+    @_active_suite = old_suite
   
-  it: (description, test_fn) =>
-    @_active_suite.add_test = new Test description
+  it: (args...) =>
+    @_active_suite.add_test new Test args...
   
   options: (options={}) ->
     for k, v of options
       if @["_option_#{k}"]? then @["_option_#{k}"](v)
   
   run: ->
+    @_base_suite.run()
 
 
 
