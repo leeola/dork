@@ -1,6 +1,14 @@
 #
 # lib/dork.coffee
 #
+# The dork library allows the more 'presentational' style code we are
+# all so familiar with. `describe -> it 'foo', ->` style code is made
+# possible by the state stored within the Dork class.
+#
+# Note that this is just the code. The main Dork instance is stored
+# within lib/index, but creating custom Dork sessions will work without
+# issue.
+#
 # Copyright (c) 2012 Lee Olayvar <leeolayvar@gmail.com>
 # MIT Licensed
 #
