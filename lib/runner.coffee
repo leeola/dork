@@ -27,7 +27,7 @@ class Runner
   #   Run this runner.
   run: (callback) =>
     running = true
-    start_time
+    start_time = undefined
     
     # Our `@_fn` callback.
     done = =>
