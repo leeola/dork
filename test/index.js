@@ -21,15 +21,9 @@ describe('index', function () {
   
   it('should return a dork instance', function () {
     var index = require('../lib')
+    var Dork = require('../lib/dork').Dork
     
-    // To assert it's identity we're just going to make sure
-    // some basic dork vars exist.
-    should.exist(index.active_suite)
-    // And since the dork object is not that unique, lets make sure it's
-    // not a suite/test object.
-    should.not.exist(index.add_suite)
-    should.not.exist(index.add_test)
-    should.not.exist(index.fn)
+    index.should.be.an.instanceof(Dork)
   })
   
   it('should expose the inner library modules', function () {

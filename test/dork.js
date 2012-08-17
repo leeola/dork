@@ -27,15 +27,8 @@ describe('dork', function () {
       dork = dork_lib.create()
     })
     
-    it('should return a dork object instance', function () {
-      // To assert it's identity we're just going to make sure
-      // some basic dork vars exist.
-      should.exist(dork.active_suite)
-      // And since the dork object is not that unique, lets make sure it's
-      // not a suite/test object.
-      should.not.exist(dork.add_suite)
-      should.not.exist(dork.add_test)
-      should.not.exist(dork.fn)
+    it('should return a dork instance', function () {
+      dork.should.be.an.instanceof(dork_lib.Dork)
     })
     
     it('should be a unique object each execution', function () {
