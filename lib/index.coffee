@@ -21,6 +21,8 @@ exports = module.exports = dork_session
 
 
 exports.dork = dork
+exports.reporters = require './reporters'
+exports.runner = require './runner'
 exports.suite = require './suite'
 exports.test = require './test'
 exports.utils = require './utils'
