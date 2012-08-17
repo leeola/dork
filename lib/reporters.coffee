@@ -8,6 +8,16 @@
 
 
 
+parse_error = (error) ->
+  # Ignore the first line since it's just the name and message.
+  stack = error.stack.split('\n    ')[1..]
+  return error =
+    name: error.name
+    message: error.message
+    stack: stack
+
+
+
 class Reporter
   constructor: (suite) ->
     if suite?
@@ -41,27 +51,36 @@ class Reporter
 
 
 
-class StdoutReporter extends Reporter
+class SimpleReporter extends Reporter
   constructor: (suite, options) ->
     super suite
+    
+    @_write = (args...) -> process.stdout.write args...
+   
+  _complete: (data) =>
+    total_tests = data.tests.all.length
+    total_passed = data.tests.passed.length
+    total_failed = data.tests.failed.length
+    
+    if total_passed is total_tests
+      @_write "#{total_tests} tests complete\n"
+    else if (total_failed + total_passed) < total_tests
+      # This is worded horribly lol. Needs to be improved.
+      @_write "#{total_failed} failed of #{total_passed} run, "+
+        "#{total_tests} possible\n"
+    else
+      @_write "#{total_failed} out of #{total_tests} failed.\n"
   
-  _complete: =>
-    process.stdout.write 'Complete!\n'
-  
-  _test_start: =>
-    process.stdout.write 'Test Started\n'
-  
-  _test_end: (data) =>
-    process.stdout.write "Test Ended: \n"
-  
-  _suite_start: =>
-    process.stdout.write 'Suite Started\n'
-  
-  _suite_end: =>
-    process.stdout.write 'Suite Ended\n'
+  _test_end: (report) =>
+    if not report.success
+      error = parse_error report.error
+      @_write "1:id) description foo bar baz:\n"
+      @_write "  #{error.name}: #{error.message}\n"
+      @_write "    #{error.stack.join '\n    '}\n"
 
 
 
 
 exports.Reporter = Reporter
-exports.StdoutReporter = StdoutReporter
+exports.SimpleReporter = SimpleReporter
+exports.StdoutReporter = SimpleReporter

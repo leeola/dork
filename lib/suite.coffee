@@ -47,13 +47,20 @@ class Suite extends emighter.Emighter
   _on_child_after_each: (meta, done) =>
     @_run_after_eachs meta, -> done()
   
-  _on_child_complete: (meta, done) =>
+  _on_child_complete: (data, done) =>
+    @_session.tests.all.push data.tests.all...
+    @_session.tests.failed.push data.tests.failed...
+    @_session.tests.passed.push data.tests.passed...
     @emit 'suite_end'
     @_next()
   
   _complete: () =>
     @_run_after_alls =>
-      @emit 'complete'
+      @emit 'complete',
+        tests:
+          all: @_session.tests.all
+          failed: @_session.tests.failed
+          passed: @_session.tests.passed
   
   _run_after_alls: (callback) =>
     if @_session.ran_a_test
@@ -88,7 +95,13 @@ class Suite extends emighter.Emighter
       @_run_before_eachs @_session.meta, =>
         @emit 'test_start'
         test.run (report) =>
-          @emit 'test_end', [report], ->
+          @_session.tests.all.push report
+          if report.success
+            @_session.tests.passed.push report
+          else
+            @_session.tests.failed.push report
+          
+          @emit 'test_end', report
           @_run_after_eachs @_session.meta, =>
             callback()
   
@@ -132,6 +145,10 @@ class Suite extends emighter.Emighter
     @_session =
       ran_a_test: false
       index: -1
+      tests:
+        all: []
+        failed: []
+        passed: []
       meta:
         description: @description
     
