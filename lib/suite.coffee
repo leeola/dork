@@ -56,7 +56,7 @@ class Suite extends emighter.Emighter
       @emit 'complete'
   
   _run_after_alls: (callback) =>
-    if @session.ran_a_test
+    if @_session.ran_a_test
       @_run_runners @_after_alls, =>
         @emit 'after_all', [], =>
           callback()
@@ -71,8 +71,8 @@ class Suite extends emighter.Emighter
   
   _run_before_alls: (meta, callback) =>
     @emit 'before_all', [meta], =>
-      if not @session.ran_a_test
-        @session.ran_a_test = true
+      if not @_session.ran_a_test
+        @_session.ran_a_test = true
         @_run_runners @_before_alls, =>
           callback()
       else
@@ -84,12 +84,12 @@ class Suite extends emighter.Emighter
         callback()
   
   _run_test: (test, callback) =>
-    @_run_before_alls @session.meta, =>
-      @_run_before_eachs @session.meta, =>
+    @_run_before_alls @_session.meta, =>
+      @_run_before_eachs @_session.meta, =>
         @emit 'test_start'
         test.run (report) =>
           @emit 'test_end', [report], ->
-          @_run_after_eachs @session.meta, =>
+          @_run_after_eachs @_session.meta, =>
             callback()
   
   _run_suite: (suite) =>
@@ -114,22 +114,22 @@ class Suite extends emighter.Emighter
     suite._run()
   
   _next: =>
-    @session.item = @_tests_and_suites[++@session.index]
+    @_session.item = @_tests_and_suites[++@_session.index]
     
-    if not @session.item?
-      if @session.test_reports > 0
+    if not @_session.item?
+      if @_session.test_reports > 0
         @_run_after_alls()
       else
         @_complete()
       
-    else if @session.item instanceof Suite
-      @_run_suite @session.item
+    else if @_session.item instanceof Suite
+      @_run_suite @_session.item
       
     else
-      @_run_test @session.item, @_next
+      @_run_test @_session.item, @_next
   
   _run: =>
-    @session =
+    @_session =
       ran_a_test: false
       index: -1
       meta:
