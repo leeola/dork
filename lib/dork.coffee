@@ -74,7 +74,6 @@ class Dork
     
     # Make the new reporters listen to the base suite.
     for reporter in new_reporters
-      console.log 'Listening to reporter!'
       reporter.listen @_base_suite
     
     # And remove the old reporters.
