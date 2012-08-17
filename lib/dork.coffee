@@ -13,6 +13,7 @@
 # MIT Licensed
 #
 utils = require './utils'
+{Runner} = require './runner'
 {Suite} = require './suite'
 {Test} = require './test'
 {StdoutReporter} = require './reporters'
