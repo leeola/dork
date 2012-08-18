@@ -82,16 +82,16 @@ class Dork
       reporter.remove @_base_suite
   
   after_all: (fn) =>
-    @_active_suite.add_after_all = new Runner fn
+    @_active_suite.add_after_all new Runner fn
   
   after_each: (fn) =>
-    @_active_suite.add_after_each = new Runner fn
+    @_active_suite.add_after_each new Runner fn
   
   before_all: (fn) =>
-    @_active_suite.add_before_all = new Runner fn
+    @_active_suite.add_before_all new Runner fn
   
   before_each: (fn) =>
-    @_active_suite.add_before_each = new Runner fn
+    @_active_suite.add_before_each new Runner fn
   
   describe: (description, context_fn) =>
     old_suite = @_active_suite
