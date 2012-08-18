@@ -48,7 +48,13 @@ class Suite extends emighter.Emighter
     @_run_after_eachs meta, -> done()
   
   _on_child_complete: (data, done) =>
-    @_session.tests.all.push data.tests.all...
+    # Loop through the child-suites tests and push this suites
+    # description onto them.
+    for test in data.tests.all
+      if @description?
+        test.descriptions[0...0] = @description
+      @_session.tests.all.push test
+    
     @_session.tests.failed.push data.tests.failed...
     @_session.tests.passed.push data.tests.passed...
     @emit 'suite_end'
@@ -95,6 +101,10 @@ class Suite extends emighter.Emighter
       @_run_before_eachs @_session.meta, =>
         @emit 'test_start'
         test.run (report) =>
+          # Add a descriptions chain. Note when Test gets reworked a bit
+          # it will have it's own description chain that we'll prepend onto.
+          report.descriptions = [@description]
+          
           @_session.tests.all.push report
           if report.success
             @_session.tests.passed.push report
@@ -141,7 +151,7 @@ class Suite extends emighter.Emighter
     else
       @_run_test @_session.item, @_next
   
-  _run: =>
+  _run: () =>
     @_session =
       ran_a_test: false
       index: -1
@@ -149,9 +159,6 @@ class Suite extends emighter.Emighter
         all: []
         failed: []
         passed: []
-      meta:
-        description: @description
-    
     @_next()
   
   # (runners, callback, index=0, reports=[]) -> undefined
