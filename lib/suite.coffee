@@ -4,14 +4,16 @@
 # Copyright (c) 2012 Lee Olayvar <leeolayvar@gmail.com>
 # MIT Licensed
 #
+emighter = require 'emighter'
 {Runner} = require './runner'
 {Test} = require './test'
 
 
 
+
 # Desc:
 #   A Suite represents a collection of tests.
-class Suite
+class Suite extends emighter.Emighter
   
   # (@description, @location) -> undefined
   #
@@ -30,63 +32,153 @@ class Suite
     
     # A list of suites and test runners.
     @_tests_and_suites = []
+    
+    @_session = undefined
+    
+    # Don't forget to call our super!
+    super()
   
-  # (callback) -> undefined
-  _run: (callback,
-      before_alls=[], before_eachs=[], after_eachs=[], index=0,
-      report={
-        total_tests: 0
-        }) =>
+  _on_child_before_all: (meta, done) =>
+    @_run_before_alls meta, -> done()
+  
+  _on_child_before_each: (meta, done) =>
+    @_run_before_eachs meta, -> done()
+  
+  _on_child_after_each: (meta, done) =>
+    @_run_after_eachs meta, -> done()
+  
+  _on_child_complete: (data, done) =>
+    # Loop through the child-suites tests and push this suites
+    # description onto them.
+    for test in data.tests.all
+      if @description?
+        test.descriptions[0...0] = @description
+      @_session.tests.all.push test
     
-    if index is 0
-      before_alls.push @_before_alls...
-      before_eachs.push @_before_eachs...
-      after_eachs[...0] = @_after_eachs
-    
-    item = @_tests_and_suites[index]
-    
-    if not item?
-      if report.total_tests > 0
-        @_run_runners @_after_alls, ->
-          callback report
-      else
-        callback report
-      return
-    
-    before_alls_callback = (runner_reports) =>
-      before_alls = []
-      item.run test_callback
-    
-    test_callback = (test_report) =>
-      # We're just faking the report for now.
-      report.total_tests += 1
-      @_run_runners after_eachs, after_eachs_callback
-    
-    after_eachs_callback = (runner_reports) =>
-      @_run callback, before_alls, before_eachs, after_eachs, ++index, report
-    
-    suite_callback = (suite_report) =>
-      if suite_report.total_tests > 0
-        before_alls = []
-        report.total_tests += suite_report.total_tests
-      @_run callback, before_alls, before_eachs, after_eachs, ++index, report
-    
-    if item instanceof Test
-      runners = []
-      runners.push before_alls...
-      runners.push before_eachs...
-      @_run_runners runners, before_alls_callback
+    @_session.tests.failed.push data.tests.failed...
+    @_session.tests.passed.push data.tests.passed...
+    @emit 'suite_end'
+    @_next()
+  
+  _complete: () =>
+    @_run_after_alls =>
+      @emit 'complete',
+        tests:
+          all: @_session.tests.all
+          failed: @_session.tests.failed
+          passed: @_session.tests.passed
+  
+  _run_after_alls: (callback) =>
+    if @_session.ran_a_test
+      @_run_runners @_after_alls, =>
+        @emit 'after_all', [], =>
+          callback()
     else
-      item._run suite_callback, before_alls[..],
-        before_eachs[..], after_eachs[..]
+      @emit 'after_all', [], =>
+        callback()
   
+  _run_after_eachs: (meta, callback) =>
+    @_run_runners @_after_eachs, =>
+      @emit 'after_each', [meta], =>
+        callback()
+  
+  _run_before_alls: (meta, callback) =>
+    @emit 'before_all', [meta], =>
+      if not @_session.ran_a_test
+        @_session.ran_a_test = true
+        @_run_runners @_before_alls, =>
+          callback()
+      else
+        callback()
+  
+  _run_before_eachs: (meta, callback) =>
+    @emit 'before_each', [meta], =>
+      @_run_runners @_before_eachs, =>
+        callback()
+  
+  _run_test: (test, callback) =>
+    @_run_before_alls @_session.meta, =>
+      @_run_before_eachs @_session.meta, =>
+        @emit 'test_start'
+        test.run (report) =>
+          # Add a descriptions chain.
+          report.descriptions = [@description, report.description]
+          
+          @_session.tests.all.push report
+          if report.success
+            @_session.tests.passed.push report
+          else
+            @_session.tests.failed.push report
+          
+          @emit 'test_end', report
+          @_run_after_eachs @_session.meta, =>
+            callback()
+  
+  _run_suite: (suite) =>
+    # Note that due to a bug in coffeescript, we need to explicitly tell
+    # emighter that we want to use a callback.
+    # See: https://github.com/jashkenas/coffee-script/issues/2489
+    suite.on 'before_all', @_on_child_before_all, callback: true
+    suite.on 'before_each', @_on_child_before_each, callback: true
+    suite.on 'after_each', @_on_child_after_each, callback: true
+    suite.on 'complete', @_on_child_complete, callback: true
+    
+    # Now set up some forwarding for events.
+    suite.on 'test', (args...) => @emit 'test', args...
+    suite.on 'test_start', (args...) => @emit 'test_start', args...
+    suite.on 'test_end', (args...) => @emit 'test_end', args...
+    suite.on 'suite', (args...) => @emit 'suite', args...
+    suite.on 'suite_start', (args...) => @emit 'suite_start', args...
+    suite.on 'suite_end', (args...) => @emit 'suite_end', args...
+    
+    # And emit our own suite start!
+    @emit 'suite_start'
+    suite._run()
+  
+  _next: =>
+    @_session.item = @_tests_and_suites[++@_session.index]
+    
+    if not @_session.item?
+      if @_session.test_reports > 0
+        @_run_after_alls()
+      else
+        @_complete()
+      
+    else if @_session.item instanceof Suite
+      @_run_suite @_session.item
+      
+    else
+      @_run_test @_session.item, @_next
+  
+  _run: () =>
+    @_session =
+      ran_a_test: false
+      index: -1
+      tests:
+        all: []
+        failed: []
+        passed: []
+    @_next()
+  
+  # (runners, callback, index=0, reports=[]) -> undefined
+  #
+  # Params:
+  #   runners: A list of runners to iterate over and execute.
+  #   callback: The callback
+  #   index: Optional. The recursive index.
+  #   reports: Optional. The reports from each runner.
+  #
+  # Desc:
+  #   An internal function to run a list of runners, and callback when
+  #   complete.
   _run_runners: (runners, callback, index=0, reports=[]) =>
     runner = runners[index]
-    
+    # If the item is null, callback with our collective reports.
     if not runner?
       callback reports
       return
     
+    # Run the runner!
     runner.run (report) =>
       reports.push report
       @_run_runners runners, callback, ++index, reports
@@ -139,6 +231,16 @@ class Suite
       runner = new Runner runner
     @_before_eachs.push runner
   
+  # (reporters) -> undefined
+  #
+  # Params:
+  #   reporter: The reporter to add.
+  #
+  # Desc:
+  #   Add a suite to this suite.
+  add_reporter: (reporter) ->
+    @_reporters.push reporter
+  
   # (suite) -> undefined
   #
   # Params:
@@ -157,6 +259,8 @@ class Suite
   # Desc:
   #   Add a test to this suite.
   add_test: (test) ->
+    if test instanceof Function
+      test = new Test test
     @_tests_and_suites.push test
   
   # (callback) -> undefined
@@ -172,5 +276,5 @@ class Suite
 
 
 
-exports.create = (description, location) -> new Suite description, location
+exports.create = (args...) -> new Suite args...
 exports.Suite = Suite

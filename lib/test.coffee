@@ -8,6 +8,7 @@
 
 
 
+
 # Desc:
 #   A Test is an extended Runner, providing information about the Runner
 #   such as Description and Location.
@@ -37,6 +38,12 @@ class Test extends Runner
       @_fn = @_location
       @_location = ''
     super @_fn, @_timeout
+  
+  _create_report: (args...) ->
+    report = super args...
+    report.description = @_description
+    return report
+
 
 
 
