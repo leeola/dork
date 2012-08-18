@@ -101,9 +101,8 @@ class Suite extends emighter.Emighter
       @_run_before_eachs @_session.meta, =>
         @emit 'test_start'
         test.run (report) =>
-          # Add a descriptions chain. Note when Test gets reworked a bit
-          # it will have it's own description chain that we'll prepend onto.
-          report.descriptions = [@description]
+          # Add a descriptions chain.
+          report.descriptions = [@description, report.description]
           
           @_session.tests.all.push report
           if report.success

@@ -18,6 +18,29 @@ class Runner
     if @_fn
       @asynchronous = if @_fn.length is 1 then true else false
   
+  
+  # (time, error) -> Object
+  #
+  # Params:
+  #   time: The execution time of the function.
+  #   error: Optional. If given, success is false.
+  #
+  # Desc:
+  #   Create a Function report to pass back to functions. This method is
+  #   inherited so that the output can be tailed to custom Runners (such
+  #   as Tests).
+  _create_report: (time, error) ->
+    if error?
+      report =
+        error: error
+        success: false
+        time: time
+    else
+      report =
+        success: true
+        time: time
+    return report
+  
   # (callback) -> undefined
   #
   # Params:
@@ -28,39 +51,38 @@ class Runner
   run: (callback) =>
     running = true
     start_time = undefined
+    timeout_error = undefined
     
     # Our `@_fn` callback.
     done = =>
       if running
         running = false
-        callback report =
-          success: true
-          time: new Date() - start_time
+        callback @_create_report new Date() - start_time
     
     # The timeout function
     timeout_callback = =>
       if running
         running = false
-        callback report =
-          success: false
-          time: new Date() - start_time
+        time = new Date() - start_time
+        
+        callback @_create_report time, timeout_error
     
     start_time = new Date()
     try
       @_fn done
     catch error
       running = false
-      callback report =
-        error: error
-        stack: error.stack
-        success: false
-        time: new Date() - start_time
+      callback @_create_report new Date() - start_time, error
     
     # If the @_fn is synchronous, call done() since the code
     # already ran and finished.
     # Note that even if there is an error, done() will be called, but that
     # doesn't matter since done() checks for `running`.
     if @asynchronous
+      # We are generating an error here so that if we timeout, we aren't
+      # trapped in the timeout context. I still need to figure out how to
+      # navigate the JS stack to provide relevant results to the user.
+      timeout_error = new Error "Execution time exceeded #{@_timeout}ms timeout"
       setTimeout timeout_callback, @_timeout
     else
       done()
