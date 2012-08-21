@@ -97,11 +97,41 @@ class Suite extends emighter.Emighter
         callback()
   
   _run_test: (test, callback) =>
+    # First increment the id index.
+    @_session.id_index++
+    
+    # Next we need to process through all patterns to match for.
+    if @_session.patterns.length > 0
+      matched_pattern = false
+      for pattern in @_session.patterns
+        if pattern instanceof RegExp
+          # This is incorrect, as it only tests the tests description, and
+          # not the entire chain, but we'll fix that soon.
+          if pattern.test test.description
+            matched_pattern = true
+            # Break out of the loop since we only care about one match
+            break
+        else
+          # Everything else we assume is an integer, and test it against
+          # the test id_index.
+          if pattern is @_session.id_index
+            matched_pattern = true
+            # Break out of the loop since we only care about one match
+            break
+      
+      # Now we check to make sure at least one of the patterns matched. If
+      # none did, bail out of this test.
+      if not matched_pattern
+        callback()
+        return
+    
+    # If we've passed the pattern check, go ahead and run all the tests.
     @_run_before_alls @_session.meta, =>
       @_run_before_eachs @_session.meta, =>
         @emit 'test_start'
         test.run (report) =>
-          # Add a descriptions chain.
+          # Add some meta
+          report.id = @_session.id_index
           report.descriptions = [@description, report.description]
           
           @_session.tests.all.push report
@@ -133,7 +163,7 @@ class Suite extends emighter.Emighter
     
     # And emit our own suite start!
     @emit 'suite_start'
-    suite._run()
+    suite._run @_session.patterns, @_session.id_index
   
   _next: =>
     @_session.item = @_tests_and_suites[++@_session.index]
@@ -150,14 +180,17 @@ class Suite extends emighter.Emighter
     else
       @_run_test @_session.item, @_next
   
-  _run: () =>
+  _run: (patterns=[], id_index=0, callback=->) =>
     @_session =
       ran_a_test: false
       index: -1
+      id_index: 0
       tests:
         all: []
         failed: []
         passed: []
+      patterns: patterns
+      callback: callback
     @_next()
   
   # (runners, callback, index=0, reports=[]) -> undefined
@@ -263,15 +296,28 @@ class Suite extends emighter.Emighter
       test = new Test test
     @_tests_and_suites.push test
   
-  # (callback) -> undefined
+  # ([patterns..], [callback]) -> undefined
   #
   # Params:
-  #   callback: The callback called when all tests have been completed.
+  #   pattern..: Optional. A pattern is a number, string, or regex pattern
+  #     which will be matched against the tests to determine if they are
+  #     run or not.
+  #     - Number: If a number is used, that Test ID will be used.
+  #     - String: If a string is used, it is converted to regex via
+  #         a regex-like syntax.
+  #     - Regex: If a regex object is used, it is matched against tests
+  #         and if it matches, the test is used.
+  #   callback: Optional. The callback called when all tests have been
+  #     completed.
   #
   # Desc:
   #   Run all the tests found in this suite, and any suites added to this.
-  run: (callback=->) ->
-    @_run (reports) ->
+  run: (patterns..., callback) ->
+    # If callback is not a function, push it back into args.
+    if callback? and not (callback instanceof Function)
+      patterns.push callback
+    
+    @_run patterns, 0, (reports) ->
       callback reports
 
 
