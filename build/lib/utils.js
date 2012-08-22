@@ -11,4 +11,10 @@
     }
   };
 
+  exports.regex_like = function(regexy) {
+    regexy = "^" + regexy + "$";
+    regexy = regexy.replace(/\*/g, '.*');
+    return new RegExp(regexy);
+  };
+
 }).call(this);

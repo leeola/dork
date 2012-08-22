@@ -48,6 +48,7 @@
         }
       }
       this.options(options);
+      this._patterns = [];
     }
 
     Dork.prototype._option_global = function(value) {
@@ -150,8 +151,15 @@
       return _results;
     };
 
+    Dork.prototype.pattern = function() {
+      var patterns, _ref;
+      patterns = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      return (_ref = this._patterns).push.apply(_ref, patterns);
+    };
+
     Dork.prototype.run = function() {
-      return this._base_suite.run();
+      var _ref;
+      return (_ref = this._base_suite).run.apply(_ref, this._patterns);
     };
 
     return Dork;

@@ -103,7 +103,7 @@
       var error;
       if (!report.success) {
         error = parse_error(report.error);
-        this._write("1:id) " + (report.descriptions.join(' ')) + ":\n");
+        this._write("" + report.id + ") " + (report.descriptions.join(' ')) + ":\n");
         this._write("  " + error.name + ": " + error.message + "\n");
         return this._write("    " + (error.stack.join('\n    ')) + "\n");
       }
