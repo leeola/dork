@@ -78,7 +78,7 @@ suite.run()
 Dork is also available from the command line, via the `dork` command.
 
 ```bash
-[leeolayvar@cloud9]:/workspace/repo$ dork --help
+[leeolayvar@work]:/workspace/repo$ dork --help
 
 Usage: dork [patterns]... [options]
 patterns     A series of patterns to filter tests by. For additional help, see README.md#patterns
@@ -95,11 +95,11 @@ explicitly stating the numeric test index, or a regex-like string that
 will match tests before they run.
 
 ```bash
-[leeolayvar@cloud9]:/workspace/repo$ dork 1 # Run test 1
+[leeolayvar@work]:/workspace/repo$ dork 1 # Run test 1
 
-[leeolayvar@cloud9]:/workspace/repo$ dork 1 2 # Run test 1 and 2
+[leeolayvar@work]:/workspace/repo$ dork 1 2 # Run test 1 and 2
 
-[leeolayvar@cloud9]:/workspace/repo$ dork 1 2 *database* # Run test 1, 2, and any tests matching
+[leeolayvar@work]:/workspace/repo$ dork 1 2 *database* # Run test 1, 2, and any tests matching
   # the pattern `/^.*database.*$/`
 ```
 
