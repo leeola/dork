@@ -4,7 +4,7 @@
 ## Description
 
 Dork.js is yet another testing framework. What sets it apart? Nothing. As time
-goes on there will be some interesting features that set it apart, but for now,
+goes on there will be some interesting features that set it apart, but for now
 you'll be much better off with
 [Mocha](http://visionmedia.github.com/mocha/)/etc.
 
@@ -41,7 +41,15 @@ dork.describe 'description', ->
 dork.run()
 ```
 
-With a feature-complete API as well.
+Options are also available:
+
+```CoffeeScript
+dork.options
+  global: true
+  reporters: [new NotUglyReporter(), new LoggerReporter()]
+```
+
+And if you prefer less magic, a feature-complete API is available as well.
 
 ```CoffeeScript
 should = require 'should'
@@ -91,7 +99,8 @@ will match tests before they run.
 
 [leeolayvar@cloud9]:/workspace/repo$ dork 1 2 # Run test 1 and 2
 
-[leeolayvar@cloud9]:/workspace/repo$ dork 1 2 *database* # Run test 1, 2, and any tests matching the pattern `/^.*database.*$/`
+[leeolayvar@cloud9]:/workspace/repo$ dork 1 2 *database* # Run test 1, 2, and any tests matching
+  # the pattern `/^.*database.*$/`
 ```
 
 And that's roughly it! Stay tuned for more interesting features :)
