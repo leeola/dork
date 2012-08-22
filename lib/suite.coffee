@@ -105,9 +105,9 @@ class Suite extends emighter.Emighter
       matched_pattern = false
       for pattern in @_session.patterns
         if pattern instanceof RegExp
-          # This is incorrect, as it only tests the tests description, and
-          # not the entire chain, but we'll fix that soon.
-          if pattern.test test.description
+          full_description = "#{@_session.descriptions.join ' '} "+
+            "#{test._description}"
+          if pattern.test full_description
             matched_pattern = true
             # Break out of the loop since we only care about one match
             break
@@ -163,7 +163,7 @@ class Suite extends emighter.Emighter
     
     # And emit our own suite start!
     @emit 'suite_start'
-    suite._run @_session.patterns, @_session.id_index
+    suite._run @_session.patterns, @_session.id_index, @_session.descriptions
   
   _next: =>
     @_session.item = @_tests_and_suites[++@_session.index]
@@ -180,8 +180,15 @@ class Suite extends emighter.Emighter
     else
       @_run_test @_session.item, @_next
   
-  _run: (patterns=[], id_index=0, callback=->) =>
+  _run: (patterns=[], id_index=0, descriptions=[], callback=->) =>
+    # Copy the chain, so that we can push our description without modifying
+    # the original.
+    descriptions = descriptions[..]
+    if @description?
+      descriptions.push @description
+    
     @_session =
+      descriptions: descriptions
       ran_a_test: false
       index: -1
       id_index: 0
@@ -317,7 +324,7 @@ class Suite extends emighter.Emighter
     if callback? and not (callback instanceof Function)
       patterns.push callback
     
-    @_run patterns, 0, (reports) ->
+    @_run patterns, 0, [], (reports) ->
       callback reports
 
 
