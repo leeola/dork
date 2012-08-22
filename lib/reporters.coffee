@@ -74,7 +74,7 @@ class SimpleReporter extends Reporter
   _test_end: (report) =>
     if not report.success
       error = parse_error report.error
-      @_write "1:id) #{report.descriptions.join ' '}:\n"
+      @_write "#{report.id}) #{report.descriptions.join ' '}:\n"
       @_write "  #{error.name}: #{error.message}\n"
       @_write "    #{error.stack.join '\n    '}\n"
 
