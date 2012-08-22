@@ -1,0 +1,42 @@
+{
+  "name": "dork",
+  "version": "0.0.1",
+  "description": "A very basic, api friendly, testing framework.",
+  "keywords": [
+    "test",
+    "bdd"
+  ],
+  "author": "leeolayvar <leeolayvar@gmail.com> (http://leeolayvar.com)",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/leeolayvar/dork.git"
+  },
+  "bugs": {
+    "url": "http://github.com/leeolayvar/dork/issues"
+  },
+  "scripts": {
+    "prepublish": "cake prepublish",
+    "test": "cake test"
+  },
+  "bin": {
+    "dork": "./build/bin/dork.js"
+  },
+  "devDependencies": {
+    "bork": "0.0.x",
+    "walker": "1.0.3",
+    "mocha": "0.14.x",
+    "should": "1.0.x",
+    "coffee-script": "1.3.x"
+  },
+  "dependencies": {
+    "nomnom": "1.5.x",
+    "emighter": "0.0.x"
+  },
+  "main": "./build/lib/index.js",
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://raw.github.com/leeolayvar/dork/master/LICENSE"
+    }
+  ]
+}
