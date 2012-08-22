@@ -47,6 +47,9 @@ Options are also available:
 dork.options
   global: true
   reporters: [new NotUglyReporter(), new LoggerReporter()]
+
+before_all ->
+  console.log "I'm global now!"
 ```
 
 And if you prefer less magic, a feature-complete API is available as well.
@@ -78,7 +81,7 @@ suite.run()
 Dork is also available from the command line, via the `dork` command.
 
 ```bash
-[leeolayvar@work]:/workspace/repo$ dork --help
+[leeolayvar@work]:/$ dork --help
 
 Usage: dork [patterns]... [options]
 patterns     A series of patterns to filter tests by. For additional help, see README.md#patterns
@@ -92,15 +95,15 @@ access to pattern matching..
 
 Pattern matching allows you to specify a specific set of tests to run via
 explicitly stating the numeric test index, or a regex-like string that
-will match tests before they run.
+must match tests before they run.
 
 ```bash
-[leeolayvar@work]:/workspace/repo$ dork 1 # Run test 1
+[leeolayvar@work]:/$ dork 1 # Run test 1
 
-[leeolayvar@work]:/workspace/repo$ dork 1 2 # Run test 1 and 2
+[leeolayvar@work]:/$ dork 1 2 # Run test 1 and 2
 
-[leeolayvar@work]:/workspace/repo$ dork 1 2 *database* # Run test 1, 2, and any tests matching
-  # the pattern `/^.*database.*$/`
+[leeolayvar@work]:/$ dork 1 2 *database*  # Run test 1, 2, and any tests matching
+                                          # the pattern `/^.*database.*$/`
 ```
 
 And that's roughly it! Stay tuned for more interesting features :)
