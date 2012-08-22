@@ -37,6 +37,9 @@ class Dork
       if not options[k]? then options[k] = v
     # And call @options to act on the Dork() options.
     @options options
+    
+    # The patterns that will be supplied to the test, during `@run`
+    @_patterns = []
   
   _option_global: (value) ->
     if @_options.global is value then return
@@ -109,8 +112,18 @@ class Dork
     for k, v of options
       if @["_option_#{k}"]? then @["_option_#{k}"](v)
   
+  # (patterns...) -> undefined
+  #
+  # Params:
+  #   patterns...: A pattern to limit tests run.
+  #
+  # Desc:
+  #   Add a pattern(s) to the suite.
+  pattern: (patterns...) ->
+    @_patterns.push patterns...
+  
   run: ->
-    @_base_suite.run()
+    @_base_suite.run @_patterns...
 
 
 

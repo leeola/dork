@@ -99,9 +99,16 @@ copy_compile = (source, output, callback) ->
 bork_task = bork()
 
 task 'build', 'build all', ->
+  invoke 'build:bin'
   invoke 'build:lib'
   invoke 'build:test'
   bork_task.start()
+
+task 'build:bin', 'build bin', ->
+  console.log 'build:bin start()'
+  bork_task.link (done) -> copy_compile './bin', './build/bin', ->
+    console.log 'build:bin end'
+    done()
 
 task 'build:lib', 'build lib', ->
   console.log 'build:lib start()'
@@ -134,6 +141,7 @@ task 'test:nobuild', 'just run the tests, don\'t build anything', ->
       done()
 
 task 'prepublish', 'build all, test all. designed to work before `npm publish`', ->
+  invoke 'build:bin'
   invoke 'build:lib'
   invoke 'build:test'
   invoke 'test:nobuild'
