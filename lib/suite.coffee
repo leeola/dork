@@ -5,6 +5,7 @@
 # MIT Licensed
 #
 emighter = require 'emighter'
+utils = require './utils'
 {Runner} = require './runner'
 {Test} = require './test'
 
@@ -323,6 +324,10 @@ class Suite extends emighter.Emighter
     # If callback is not a function, push it back into args.
     if callback? and not (callback instanceof Function)
       patterns.push callback
+    
+    for pattern, i in patterns
+      if typeof pattern is 'string'
+        patterns[i] = utils.regex_like pattern
     
     @_run patterns, 0, [], (reports) ->
       callback reports
