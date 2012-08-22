@@ -1,6 +1,6 @@
 {
   "name": "dork",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A very basic, api friendly, testing framework.",
   "keywords": [
     "test",
@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "nomnom": "1.5.x",
-    "emighter": "0.0.x"
+    "emighter": "0.0.1"
   },
   "main": "./build/lib/index.js",
   "licenses": [
