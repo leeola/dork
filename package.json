@@ -1,6 +1,6 @@
 {
   "name": "dork",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A very basic, api friendly, testing framework.",
   "keywords": [
     "test",
@@ -24,7 +24,7 @@
   "devDependencies": {
     "bork": "0.0.x",
     "walker": "1.0.3",
-    "mocha": "0.14.x",
+    "dork": "0.0.3",
     "should": "1.0.x",
     "coffee-script": "1.3.x"
   },
