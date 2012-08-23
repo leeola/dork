@@ -29,8 +29,9 @@
     "coffee-script": "1.3.x"
   },
   "dependencies": {
+    "emighter": "0.0.1",
     "nomnom": "1.5.x",
-    "emighter": "0.0.1"
+    "resolve": "0.5.x"
   },
   "main": "./build/lib/index.js",
   "licenses": [
