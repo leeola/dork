@@ -63,10 +63,6 @@ exec = (input) ->
   # Parse the opts, with a possible input override.
   opts = nomnom.parse input
   
-  # If the user specified coffee usage, import immediately.
-  if opts.coffee is true
-    import_coffee()
-  
   for user_file in opts.files
     # Resolve the path relative to the cwd.
     file = path.join process.cwd(), user_file
@@ -81,11 +77,19 @@ exec = (input) ->
       else
         throw new Error "The file '#{user_file}' does not exist."
     
+    # If the user supplied path is a directory, we need to make sure not to
+    # use dirname(), as it pops off the ending path, leaving you up one
+    # more directory than you intended.
+    stat = fs.statSync file
+    if stat.isDirectory()
+      dirname = file
+    else
+      dirname = path.dirname file
+    
     # If the user didn't specify a coffee option, attempt to figure
     # out if the file is CoffeeScript. The below code also supports
     # specifying a directory with a coffee index file.
     if opts.coffee is undefined
-      stat = fs.statSync file
       if stat.isFile() and path.extname(file) is '.coffee'
         import_coffee()
       else if stat.isDirectory()
@@ -95,7 +99,10 @@ exec = (input) ->
           index_file = path.join file, 'index.coffee'
           stat = fs.statSync index_file
           if path.extname(index_file) is '.coffee'
-            import_coffee()
+            import_coffee dirname
+    # If the user specified coffee usage, import immediately.
+    else if opts.coffee is true
+      import_coffee dirname
     
     
     # Import the target file/directory, then simply run dork.
@@ -110,7 +117,6 @@ exec = (input) ->
     # dork instance*!
     # To solve this issue, we use the same dork module that the target file
     # should be using when it calls `require 'dork'`.
-    dirname = path.dirname file
     dork = require resolve.sync 'dork', basedir: dirname
     
     # Define any patterns provided.
@@ -124,9 +130,9 @@ exec = (input) ->
 # Desc:
 #   A simple function to attempt to import coffee, or fail with a meaningful
 #   message if coffee is not found.
-import_coffee = ->
+import_coffee = (basedir) ->
   try
-    require 'coffee-script'
+    require resolve.sync 'coffee-script', basedir: basedir
   catch e
     if e.message is "Cannot find module 'coffee-script'"
       throw new Error 'CoffeeScript must be installed manually to test '+
