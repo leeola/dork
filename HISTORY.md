@@ -1,0 +1,17 @@
+
+0.0.3 / 2012-08-22
+==================
+
+  * Rewrote `bin/dork.js` to remove some assumed hidden characters that were
+    screwing with Linux installations.
+
+0.0.2 / 2012-08-22
+==================
+
+  * Removed the wildcard for the Emighter dependancy. This was causing issues
+    with Emighter's circular dependancy.
+
+0.0.1 / 2012-08-22
+==================
+
+  * Initial release
