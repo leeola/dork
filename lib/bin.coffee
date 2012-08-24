@@ -66,7 +66,6 @@ exec = (input) ->
   for user_file in opts.files
     # Resolve the path relative to the cwd.
     file = path.join process.cwd(), user_file
-    dirname = path.dirname file
     
     # Check if the file specified by the user even exists.
     if not existsSync(file)
@@ -78,11 +77,19 @@ exec = (input) ->
       else
         throw new Error "The file '#{user_file}' does not exist."
     
+    # If the user supplied path is a directory, we need to make sure not to
+    # use dirname(), as it pops off the ending path, leaving you up one
+    # more directory than you intended.
+    stat = fs.statSync file
+    if stat.isDirectory()
+      dirname = file
+    else
+      dirname = path.dirname file
+    
     # If the user didn't specify a coffee option, attempt to figure
     # out if the file is CoffeeScript. The below code also supports
     # specifying a directory with a coffee index file.
     if opts.coffee is undefined
-      stat = fs.statSync file
       if stat.isFile() and path.extname(file) is '.coffee'
         import_coffee()
       else if stat.isDirectory()
