@@ -2,7 +2,8 @@
 0.0.5 /
 ==================
 
-  * 
+  * Added a fix for CoffeeScript testing so that it will import from
+    directories relative to the specified testing file.
 
 0.0.4 / 2012-08-23
 ==================
