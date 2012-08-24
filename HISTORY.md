@@ -1,5 +1,5 @@
 
-0.0.4 /
+0.0.4 / 2012-08-23
 ==================
 
   * Fixed a global installation bug where the local Dork session was not
