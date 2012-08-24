@@ -1,5 +1,5 @@
 
-0.0.5 /
+0.0.5 / 2012-08-24
 ==================
 
   * Added a fix for CoffeeScript testing so that it will import from
