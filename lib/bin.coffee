@@ -8,7 +8,7 @@
 #
 path = require 'path'
 nomnom = require 'nomnom'
-dork = require './index'
+resolve = require 'resolve'
 
 
 
@@ -42,7 +42,7 @@ nomnom.options
 # Desc:
 #   Execute a dork test based on the arguments provided by either
 #   `process.argv` or the `input` argument.
-exports.exec = (input) ->
+exec = (input) ->
   # Parse the opts, with a possible input override.
   opts = nomnom.parse input
   
@@ -54,10 +54,25 @@ exports.exec = (input) ->
     # All tests within the given file "should" (lol) have defined themselves
     # to the dork instance.
     require file
-  
-  # Define any patterns provided.
-  for pattern in opts.patterns
-    dork.pattern pattern
-  
-  # Now run dork.
-  dork.run()
+    
+    # Now import the dork session based on the locally installed dork.
+    # This is done because Dork stores it's sessions in the index module
+    # of the local dork package. If this bin is installed globally via
+    # `npm install -g dork` then `require './index'` will return the *wrong
+    # dork instance*!
+    # To solve this issue, we use the same dork module that the target file
+    # should be using when it calls `require 'dork'`.
+    dirname = path.dirname file
+    dork = require resolve.sync 'dork', basedir: dirname
+    
+    # Define any patterns provided.
+    for pattern in opts.patterns
+      dork.pattern pattern
+    
+    # Now run dork.
+    dork.run()
+
+
+
+
+exports.exec = exec
