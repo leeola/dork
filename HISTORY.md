@@ -1,4 +1,10 @@
 
+0.0.4 /
+==================
+
+  * Fixed a global installation bug where the local Dork session was not
+    being used, and as such making global bin usage impossible.
+
 0.0.3 / 2012-08-22
 ==================
 
