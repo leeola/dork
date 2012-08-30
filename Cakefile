@@ -14,6 +14,7 @@ Walker = require 'walker'
 
 
 
+BROWSERIFY_BIN = './node_modules/browserify/bin/cmd.js'
 COFFEE_BIN = './node_modules/coffee-script/bin/coffee'
 MOCHA_BIN = './node_modules/mocha/bin/mocha'
 
@@ -100,6 +101,7 @@ bork_task = bork()
 
 task 'build', 'build all', ->
   invoke 'build:bin'
+  invoke 'build:browser'
   invoke 'build:lib'
   invoke 'build:test'
   bork_task.start()
@@ -109,6 +111,14 @@ task 'build:bin', 'build bin', ->
   bork_task.link (done) -> copy_compile './bin', './build/bin', ->
     console.log 'build:bin end'
     done()
+
+task 'build:browser', 'build browser', ->
+  bork_task.link (done) ->
+    console.log 'build:browser start()'
+    exec BROWSERIFY_BIN, ['./browser/dork.coffee', '-o',
+        'build/browser/dork.js'], ->
+      console.log 'build:browser end'
+      done()
 
 task 'build:lib', 'build lib', ->
   console.log 'build:lib start()'
