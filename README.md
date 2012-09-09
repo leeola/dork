@@ -1,3 +1,4 @@
+[![build status](https://secure.travis-ci.org/leeolayvar/dork.png)](http://travis-ci.org/leeolayvar/dork)
 
 # Dork.js - Yet another test framework.
 
