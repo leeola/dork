@@ -1,9 +1,10 @@
 {
   "name": "dork",
-  "version": "0.0.0",
-  "description": "Dragons, dragons everywhere.",
+  "version": "0.0.6",
+  "description": "A very basic, api friendly, testing framework.",
   "keywords": [
-    "dragons"
+    "test",
+    "bdd"
   ],
   "author": "leeolayvar <leeolayvar@gmail.com> (http://leeolayvar.com)",
   "repository": {
@@ -17,14 +18,20 @@
     "prepublish": "cake prepublish",
     "test": "cake test"
   },
+  "bin": {
+    "dork": "./build/bin/dork.js"
+  },
   "devDependencies": {
     "bork": "0.0.x",
     "walker": "1.0.3",
-    "mocha": "0.14.x",
+    "dork": "0.0.4",
     "should": "1.0.x",
     "coffee-script": "1.3.x"
   },
   "dependencies": {
+    "emighter": "0.0.1",
+    "nomnom": "1.5.x",
+    "resolve": "0.2.x"
   },
   "main": "./build/lib/index.js",
   "licenses": [
