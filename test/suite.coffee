@@ -4,14 +4,10 @@
 # Copyright (c) 2012 Lee Olayvar <leeolayvar@gmail.com>
 # MIT Licensed
 #
+dork = require 'dork'
 should = require 'should'
+require './options'
 
-
-# These are here so my IDE will shut the hell up.
-before = global.before
-before_each = global.beforeEach
-describe = global.describe
-it = global.it
 
 
 
@@ -316,3 +312,8 @@ describe 'A suite with a kitchen sink', ->
   it 'should match the expected result when running subsuite_b', ->
     subsuite_b.run()
     run_log.should.eql([])
+
+
+
+
+if require.main is module then dork.run()

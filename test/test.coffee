@@ -4,16 +4,9 @@
 # Copyright (c) 2012 Lee Olayvar <leeolayvar@gmail.com>
 # MIT Licensed
 #
+dork = require 'dork'
 should = require 'should'
-
-
-
-
-# These are here so my IDE will shut the hell up.
-before = global.before
-before_each = global.beforeEach
-describe = global.describe
-it = global.it
+require './options'
 
 
 
@@ -67,3 +60,8 @@ describe 'test', ->
         test.run (r) -> report = r
         
         report.success.should.be.false
+
+
+
+
+if require.main is module then dork.run()
