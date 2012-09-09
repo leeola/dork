@@ -4,16 +4,10 @@
 # Copyright (c) 2012 Lee Olayvar <leeolayvar@gmail.com>
 # MIT Licensed
 #
+dork = require 'dork'
 should = require 'should'
+require './options'
 
-
-
-
-# These are here so my IDE will shut the hell up.
-before = global.before
-before_each = global.beforeEach
-describe = global.describe
-it = global.it
 
 
 
@@ -35,3 +29,8 @@ describe 'dork', ->
       
       old_test.foo = 'bar'
       should.not.exist new_test.foo
+
+
+
+
+if require.main is module then dork.run()
