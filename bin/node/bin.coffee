@@ -1,7 +1,7 @@
 #
-# lib/bin.coffee
+# bin/node/bin.coffee
 #
-# A node specific entry point for now.
+# A node specific command line entry point.
 #
 # Copyright (c) 2012 Lee Olayvar <leeolayvar@gmail.com>
 # MIT Licensed
