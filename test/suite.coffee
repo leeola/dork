@@ -84,6 +84,7 @@ describe 'Suite', ->
       suite.add_before_each runner
       suite._before_eachs.should.eql([runner])
 
+
 # We're going to try a different approach here to structuring the tests.
 # Please bear with us.
 describe 'A suite', ->
@@ -221,10 +222,59 @@ describe 'A suite', ->
       suite.run()
       run_log.should.eql([])
 
+
+# And another slight design. So far, all i like is the kitchen sink method.
+# The above method (defining the suites in tiny segments) is messy and
+# hard to read.
+describe 'A suite', ->
+  {Suite} = require '../lib/suite'
+  {Runner} = require '../lib/runner'
+  {Test} = require '../lib/test'
+  run_log = null
+  
+  
+  before_each ->
+    run_log = []
+  
+  
+  it 'should not call tests after a before_each failure.', (done) ->
+    suite = new Suite()
+    suite.add_before_each ->
+      run_log.push 'before_each one'
+      throw new Error 'This error will be suppressed by the suite.'
+    suite.add_before_each -> run_log.push 'before_each two'
+    suite.add_test -> run_log.push 'test one'
+    suite.add_test -> run_log.push 'test two'
+    # This should never be called
+    suite.add_after_each -> run_log.push 'after_each one'
+    suite.add_after_each -> run_log.push 'after_each two'
+    suite.run ->
+      run_log.should.equal [
+        'before_each one'
+        ]
+      done()
+  
+  
+  it 'should not call tests after a before_each timeout.', (done) ->
+    suite = new Suite()
+    # Note that this 'fails' because the timeout never gets called.
+    suite.add_before_each (done) -> run_log.push 'before_each one'
+    suite.add_before_each -> run_log.push 'before_each two'
+    suite.add_test -> run_log.push 'test one'
+    suite.add_test -> run_log.push 'test two'
+    # This should never be called
+    suite.add_after_each -> run_log.push 'after_each one'
+    suite.add_after_each -> run_log.push 'after_each two'
+    suite.run ->
+      run_log.should.equal [
+        'before_each one'
+        ]
+      done()
+
+
 # This is our catch-all test. Because there are a *lot* of possibilities
 # with this set of tests, we're going to do a bunch of random tests,
 # and one test that does one of everything.
-# A suite
 describe 'A suite with a kitchen sink', ->
   {Suite} = require '../lib/suite'
   {Runner} = require '../lib/runner'
