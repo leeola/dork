@@ -24,7 +24,7 @@
   "devDependencies": {
     "coffee-script": "1.3.x",
     "browserify": "1.15.x",
-    "dork": "0.0.4",
+    "dork": "0.0.5",
     "should": "1.0.x",
     
     "bork": "0.0.x",

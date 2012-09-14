@@ -16,7 +16,7 @@ Walker = require 'walker'
 
 BROWSERIFY_BIN = './node_modules/browserify/bin/cmd.js'
 COFFEE_BIN = './node_modules/coffee-script/bin/coffee'
-MOCHA_BIN = './node_modules/mocha/bin/mocha'
+DORK_BIN = './node_modules/dork/build/bin/dork.js'
 
 
 
@@ -138,6 +138,8 @@ task 'test', 'build test, then run it', ->
   bork_task.start()
 
 task 'test:full', 'build test, then run it', ->
+  invoke 'build:browser'
+  invoke 'build:bin'
   invoke 'build:lib'
   invoke 'build:test'
   invoke 'test:nobuild'
@@ -146,11 +148,12 @@ task 'test:full', 'build test, then run it', ->
 task 'test:nobuild', 'just run the tests, don\'t build anything', ->
   bork_task.seq (done) ->
     console.log 'test start'
-    exec MOCHA_BIN, ['./build/test'], ->
+    exec DORK_BIN, ['-f ./build/test'], ->
       console.log 'test done'
       done()
 
 task 'prepublish', 'build all, test all. designed to work before `npm publish`', ->
+  invoke 'build:browser'
   invoke 'build:bin'
   invoke 'build:lib'
   invoke 'build:test'
