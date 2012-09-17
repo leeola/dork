@@ -62,15 +62,14 @@ class Suite extends emighter.Emighter
     @_next()
   
   _complete: () =>
-    @_run_after_alls =>
-      reports =
-        tests:
-          all: @_session.tests.all
-          failed: @_session.tests.failed
-          passed: @_session.tests.passed
-      
-      if @_session.callback? then @_session.callback reports
-      @emit 'complete', reports
+    reports =
+      tests:
+        all: @_session.tests.all
+        failed: @_session.tests.failed
+        passed: @_session.tests.passed
+    
+    if @_session.callback? then @_session.callback reports
+    @emit 'complete', reports
   
   _run_after_alls: (callback) =>
     if @_session.ran_a_test
@@ -96,8 +95,21 @@ class Suite extends emighter.Emighter
         callback()
   
   _run_before_eachs: (meta, callback) =>
+    # Iterate through before_eachs, and bail if there is an error.
+    run_before_eachs = (callback, index=0) =>
+      runner = @_before_eachs[index]
+      if not runner?
+        callback()
+        return
+      
+      runner.run (report) =>
+        if report.success
+          run_before_eachs callback, ++index
+        else
+          @_complete()
+    
     @emit 'before_each', [meta], =>
-      @_run_runners @_before_eachs, =>
+      run_before_eachs ->
         callback()
   
   _run_test: (test, callback) =>
@@ -173,9 +185,7 @@ class Suite extends emighter.Emighter
     @_session.item = @_tests_and_suites[++@_session.index]
     
     if not @_session.item?
-      if @_session.test_reports > 0
-        @_run_after_alls()
-      else
+      @_run_after_alls =>
         @_complete()
       
     else if @_session.item instanceof Suite
