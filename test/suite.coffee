@@ -93,7 +93,7 @@ describe 'Suite', ->
       suite = new Suite()
       suite.run -> run_log.push 'run callback'
       
-      run_log.should.equal ['run callback']
+      run_log.should.eql ['run callback']
     
     it 'should delay calling back until the tests are done', (done) ->
       suite = new Suite()
@@ -106,7 +106,7 @@ describe 'Suite', ->
         run_log.push 'run callback'
         
         # Now, inside the run() callback, ensure our run_log is expected.
-        run_log.should.equal [
+        run_log.should.eql [
           'test'
           'run callback'
         ]
