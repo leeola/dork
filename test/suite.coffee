@@ -265,7 +265,7 @@ describe 'A suite', ->
     run_log = []
   
   
-  it 'should not call tests after a before_each failure.', (done) ->
+  it 'should not call tests after a before_each error.', (done) ->
     suite = new Suite()
     suite.add_before_each ->
       run_log.push 'before_each one'
