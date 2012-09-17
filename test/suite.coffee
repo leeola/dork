@@ -265,6 +265,25 @@ describe 'A suite', ->
     run_log = []
   
   
+  it 'should not call tests after a before_all error.', (done) ->
+    suite = new Suite()
+    suite.add_before_all ->
+      run_log.push 'before_all one'
+      throw new Error 'This error will be suppressed by the suite.'
+    suite.add_before_all -> run_log.push 'before_all two'
+    suite.add_before_each -> run_log.push 'before_each'
+    suite.add_test -> run_log.push 'test one'
+    suite.add_test -> run_log.push 'test two'
+    suite.add_after_each -> run_log.push 'after_each'
+    suite.add_after_all -> run_log.push 'after_all'
+    
+    suite.run ->
+      run_log.should.eql [
+        'before_all one'
+        ]
+      done()
+  
+  
   it 'should not call tests after a before_each error.', (done) ->
     suite = new Suite()
     suite.add_before_each ->
@@ -273,7 +292,6 @@ describe 'A suite', ->
     suite.add_before_each -> run_log.push 'before_each two'
     suite.add_test -> run_log.push 'test one'
     suite.add_test -> run_log.push 'test two'
-    # This should never be called
     suite.add_after_each -> run_log.push 'after_each'
     suite.add_after_all -> run_log.push 'after_all'
     suite.run ->
@@ -283,19 +301,53 @@ describe 'A suite', ->
       done()
   
   
-  it 'should not call tests after a before_each timeout.', (done) ->
+  it 'should not call tests after a after_each error.', (done) ->
     suite = new Suite()
-    # Note that this 'fails' because the timeout never gets called.
-    suite.add_before_each (done) -> run_log.push 'before_each one'
-    suite.add_before_each -> run_log.push 'before_each two'
+    suite.add_before_all -> run_log.push 'before_all'
+    suite.add_before_each -> run_log.push 'before_each'
+    suite.add_test -> run_log.push 'test one'
+    suite.add_test -> run_log.push 'test two'
+    # This should never be called
+    suite.add_after_each ->
+      run_log.push 'after_each one'
+      throw new Error 'This error will be suppressed by the suite.'
+    suite.add_after_each -> run_log.push 'after_each two'
+    suite.add_after_all -> run_log.push 'after_all'
+    
+    suite.run ->
+      run_log.should.eql [
+        'before_all'
+        'before_each'
+        'test one'
+        'after_each one'
+        ]
+      done()
+  
+  
+  it 'should not call tests after a after_all error.', (done) ->
+    suite = new Suite()
+    suite.add_before_all -> run_log.push 'before_all'
+    suite.add_before_each -> run_log.push 'before_each'
     suite.add_test -> run_log.push 'test one'
     suite.add_test -> run_log.push 'test two'
     # This should never be called
     suite.add_after_each -> run_log.push 'after_each'
-    suite.add_after_all -> run_log.push 'after_all'
+    suite.add_after_all ->
+      run_log.push 'after_all one'
+      throw new Error 'This error will be suppressed by the suite.'
+    suite.add_after_all -> run_log.push 'after_all two'
+    
     suite.run ->
       run_log.should.eql [
-        'before_each one'
+        'before_all'
+        'before_each'
+        'test one'
+        'after_each'
+        'before_each'
+        'test two'
+        'after_each'
+        'after_all one'
+        # Should not call 'after_all two'
         ]
       done()
 
