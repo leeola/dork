@@ -83,6 +83,34 @@ describe 'Suite', ->
     it 'should append the runner to the stack', ->
       suite.add_before_each runner
       suite._before_eachs.should.eql([runner])
+  
+  describe '#run()', ->
+    run_log = null
+    
+    before_each -> run_log = []
+    
+    it 'should callback immediately when empty', ->
+      suite = new Suite()
+      suite.run -> run_log.push 'run callback'
+      
+      run_log.should.eql ['run callback']
+    
+    it 'should delay calling back until the tests are done', (done) ->
+      suite = new Suite()
+      suite.add_test (done) ->
+        run_log.push 'test'
+        # Only a tiny timeout is needed, to make it "async"
+        setTimeout done, 100
+      
+      suite.run ->
+        run_log.push 'run callback'
+        
+        # Now, inside the run() callback, ensure our run_log is expected.
+        run_log.should.eql [
+          'test'
+          'run callback'
+        ]
+        done()
 
 
 # We're going to try a different approach here to structuring the tests.

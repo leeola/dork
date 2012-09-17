@@ -63,11 +63,14 @@ class Suite extends emighter.Emighter
   
   _complete: () =>
     @_run_after_alls =>
-      @emit 'complete',
+      reports =
         tests:
           all: @_session.tests.all
           failed: @_session.tests.failed
           passed: @_session.tests.passed
+      
+      if @_session.callback? then @_session.callback reports
+      @emit 'complete', reports
   
   _run_after_alls: (callback) =>
     if @_session.ran_a_test
@@ -324,6 +327,9 @@ class Suite extends emighter.Emighter
     # If callback is not a function, push it back into args.
     if callback? and not (callback instanceof Function)
       patterns.push callback
+      callback = ->
+    else if not callback?
+      callback = ->
     
     for pattern, i in patterns
       if typeof pattern is 'string'
