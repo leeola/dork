@@ -274,10 +274,10 @@ describe 'A suite', ->
     suite.add_test -> run_log.push 'test one'
     suite.add_test -> run_log.push 'test two'
     # This should never be called
-    suite.add_after_each -> run_log.push 'after_each one'
-    suite.add_after_each -> run_log.push 'after_each two'
+    suite.add_after_each -> run_log.push 'after_each'
+    suite.add_after_all -> run_log.push 'after_all'
     suite.run ->
-      run_log.should.equal [
+      run_log.should.eql [
         'before_each one'
         ]
       done()
@@ -291,10 +291,10 @@ describe 'A suite', ->
     suite.add_test -> run_log.push 'test one'
     suite.add_test -> run_log.push 'test two'
     # This should never be called
-    suite.add_after_each -> run_log.push 'after_each one'
-    suite.add_after_each -> run_log.push 'after_each two'
+    suite.add_after_each -> run_log.push 'after_each'
+    suite.add_after_all -> run_log.push 'after_all'
     suite.run ->
-      run_log.should.equal [
+      run_log.should.eql [
         'before_each one'
         ]
       done()
