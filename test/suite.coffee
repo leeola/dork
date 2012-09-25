@@ -265,7 +265,7 @@ describe 'A suite', ->
     run_log = []
   
   
-  it 'should not call tests after a before_all error.', (done) ->
+  it 'should not continue after an before_all error.', (done) ->
     suite = new Suite()
     suite.add_before_all ->
       run_log.push 'before_all one'
@@ -284,7 +284,7 @@ describe 'A suite', ->
       done()
   
   
-  it 'should not call tests after a before_each error.', (done) ->
+  it 'should not continue after an before_each error.', (done) ->
     suite = new Suite()
     suite.add_before_each ->
       run_log.push 'before_each one'
@@ -301,7 +301,7 @@ describe 'A suite', ->
       done()
   
   
-  it 'should not call tests after a after_each error.', (done) ->
+  it 'should not continue after an after_each error.', (done) ->
     suite = new Suite()
     suite.add_before_all -> run_log.push 'before_all'
     suite.add_before_each -> run_log.push 'before_each'
@@ -324,7 +324,7 @@ describe 'A suite', ->
       done()
   
   
-  it 'should not call tests after a after_all error.', (done) ->
+  it 'should not continue after an after_all error.', (done) ->
     suite = new Suite()
     suite.add_before_all -> run_log.push 'before_all'
     suite.add_before_each -> run_log.push 'before_each'
