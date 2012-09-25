@@ -73,44 +73,44 @@ class Suite extends emighter.Emighter
   
   _run_after_alls: (callback) =>
     if @_session.ran_a_test
-      @_run_runners @_after_alls, =>
-        @emit 'after_all', [], =>
-          callback()
+      @_run_runners @_after_alls, (reports) =>
+        # If there is an error, it will be the last report..
+        if ((lreport = reports[-1..-1][0])? and lreport.success) or not lreport?
+          @emit 'after_all', [], =>
+            callback()
+        else
+          @_complete()
     else
       @emit 'after_all', [], =>
         callback()
   
   _run_after_eachs: (meta, callback) =>
-    @_run_runners @_after_eachs, =>
-      @emit 'after_each', [meta], =>
-        callback()
+    @_run_runners @_after_eachs, (reports) =>
+      if ((lreport = reports[-1..-1][0])? and lreport.success) or not lreport?
+        @emit 'after_each', [meta], =>
+          callback()
+      else
+        @_complete()
   
   _run_before_alls: (meta, callback) =>
     @emit 'before_all', [meta], =>
       if not @_session.ran_a_test
         @_session.ran_a_test = true
-        @_run_runners @_before_alls, =>
-          callback()
+        @_run_runners @_before_alls, (reports) =>
+          if ((lreport = reports[-1..-1][0])? and lreport.success) or not lreport?
+            callback()
+          else
+            @_complete()
       else
         callback()
   
   _run_before_eachs: (meta, callback) =>
-    # Iterate through before_eachs, and bail if there is an error.
-    run_before_eachs = (callback, index=0) =>
-      runner = @_before_eachs[index]
-      if not runner?
-        callback()
-        return
-      
-      runner.run (report) =>
-        if report.success
-          run_before_eachs callback, ++index
+    @emit 'before_each', [meta], =>
+      @_run_runners @_before_eachs, (reports) =>
+        if ((lreport = reports[-1..-1][0])? and lreport.success) or not lreport?
+          callback()
         else
           @_complete()
-    
-    @emit 'before_each', [meta], =>
-      run_before_eachs ->
-        callback()
   
   _run_test: (test, callback) =>
     # First increment the id index.
@@ -225,6 +225,11 @@ class Suite extends emighter.Emighter
   # Desc:
   #   An internal function to run a list of runners, and callback when
   #   complete.
+  #
+  #   Note that currently, this bails if there is a failure in any
+  #   of the runners. Currently Dork doesn't support any type of intelligent
+  #   pre/post test failure handling. Such as trying to call the after_all
+  #   function to close open sockets, opened by a bad before_all.. or whatever.
   _run_runners: (runners, callback, index=0, reports=[]) =>
     runner = runners[index]
     # If the item is null, callback with our collective reports.
@@ -235,7 +240,10 @@ class Suite extends emighter.Emighter
     # Run the runner!
     runner.run (report) =>
       reports.push report
-      @_run_runners runners, callback, ++index, reports
+      if report.success
+        @_run_runners runners, callback, ++index, reports
+      else
+        callback reports
   
   # (runner) -> undefined
   #
