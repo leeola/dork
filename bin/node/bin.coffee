@@ -41,6 +41,13 @@ nomnom.options
     list: true
     help: 'The file or directory to run tests in.'
   
+  install:
+    abbr: 'i'
+    metavar: 'DIRECTORY'
+    help: 'The dork installation to use. By default, a normal `require` is '+
+      'used from the location of the tests, however if this value is given '+
+      'it will be used to override that behavior.'
+  
   patterns:
     default: []
     position: 0
@@ -104,12 +111,6 @@ exec = (input) ->
     else if opts.coffee is true
       import_coffee dirname
     
-    
-    # Import the target file/directory, then simply run dork.
-    # All tests within the given file "should" (lol) have defined themselves
-    # to the dork instance.
-    require file
-    
     # Now import the dork session based on the locally installed dork.
     # This is done because Dork stores it's sessions in the index module
     # of the local dork package. If this bin is installed globally via
@@ -118,6 +119,27 @@ exec = (input) ->
     # To solve this issue, we use the same dork module that the target file
     # should be using when it calls `require 'dork'`.
     dork = require resolve.sync 'dork', basedir: dirname
+    
+    if opts.install?
+      opts_dork = require(
+        path.join path.relative(__dirname, process.cwd()),
+        opts.install
+        )
+      # By reinitializing the dork module with the user supplied opts_dork
+      # module, we 'ghost' the entire dork library to the user supplied
+      # library. Yes, this is very hacky, but the only way i have found to
+      # achieve this functionality. To see what happens during `__intialize`,
+      # see: lib/index.coffee#__initialize()
+      dork.__initialize opts_dork
+      # Since __initialize reassigns the export, we need to update our export.
+      # This could be done by reimporting dork, but since it's just going to
+      # point to the `opts_dork` object, we may as well just assign it manually
+      dork = opts_dork
+    
+    # Import the target file/directory, then simply run dork.
+    # All tests within the given file "should" (lol) have defined themselves
+    # to the dork instance.
+    require file
     
     # Define any patterns provided.
     for pattern in opts.patterns
