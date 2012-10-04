@@ -2,7 +2,10 @@
 0.0.6 /
 ==================
 
-  * 
+  * Added a flag to specify which dork installation to use when running tests.
+    Note that this feature is.. hacky.. at best, a revision would be nice
+    but as of yet, i cannot find another way to implement it due to how dork
+    stores its session in the `require 'dork'` index file.
 
 0.0.5 / 2012-08-24
 ==================
