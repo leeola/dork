@@ -79,6 +79,12 @@ class Suite extends emighter.Emighter
           @emit 'after_all', [], =>
             callback()
         else
+          descriptions = @_session.descriptions[..]
+          descriptions.push '-- AFTER ALL'
+          for report in reports
+            report.type = 'after_all'
+            report.description = 'AFTER ALL'
+            @emit 'report', report
           @_complete()
     else
       @emit 'after_all', [], =>
@@ -90,6 +96,12 @@ class Suite extends emighter.Emighter
         @emit 'after_each', [meta], =>
           callback()
       else
+        descriptions = @_session.descriptions[..]
+        descriptions.push '-- AFTER EACH'
+        for report in reports
+          report.type = 'after_each'
+          report.description = 'AFTER EACH'
+          @emit 'report', report
         @_complete()
   
   _run_before_alls: (meta, callback) =>
@@ -100,6 +112,12 @@ class Suite extends emighter.Emighter
           if ((lreport = reports[-1..-1][0])? and lreport.success) or not lreport?
             callback()
           else
+            descriptions = @_session.descriptions[..]
+            descriptions.push '-- BEFORE ALL'
+            for report in reports
+              report.type = 'before_all'
+              report.description = 'BEFORE ALL'
+              @emit 'report', report
             @_complete()
       else
         callback()
@@ -110,6 +128,13 @@ class Suite extends emighter.Emighter
         if ((lreport = reports[-1..-1][0])? and lreport.success) or not lreport?
           callback()
         else
+          descriptions = @_session.descriptions[..]
+          descriptions.push '-- BEFORE EACH'
+          for report in reports
+            report.type = 'before_eachs'
+            report.description = 'BEFORE EACH'
+            report.descriptions = descriptions
+            @emit 'report', report
           @_complete()
   
   _run_test: (test, callback) =>
@@ -147,6 +172,7 @@ class Suite extends emighter.Emighter
         @emit 'test_start'
         test.run (report) =>
           # Add some meta
+          report.type = 'test'
           report.id = @_session.id_index
           report.descriptions = [@description, report.description]
           
@@ -156,7 +182,7 @@ class Suite extends emighter.Emighter
           else
             @_session.tests.failed.push report
           
-          @emit 'test_end', report
+          @emit 'report', report
           @_run_after_eachs @_session.meta, =>
             callback()
   
@@ -173,6 +199,7 @@ class Suite extends emighter.Emighter
     suite.on 'test', (args...) => @emit 'test', args...
     suite.on 'test_start', (args...) => @emit 'test_start', args...
     suite.on 'test_end', (args...) => @emit 'test_end', args...
+    suite.on 'report', (args...) => @emit 'report', args...
     suite.on 'suite', (args...) => @emit 'suite', args...
     suite.on 'suite_start', (args...) => @emit 'suite_start', args...
     suite.on 'suite_end', (args...) => @emit 'suite_end', args...
