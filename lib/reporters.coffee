@@ -29,6 +29,8 @@ class Reporter
   
   _test_end: =>
   
+  _report: =>
+  
   _suite_start: =>
   
   _suite_end: =>
@@ -36,6 +38,7 @@ class Reporter
   end: (suite) ->
     suite.remove 'test_start', @_test_start
     suite.remove 'test_end', @_test_end
+    suite.remove 'report', @_report
     suite.remove 'suite_start', @_suite_start
     suite.remove 'suite_end', @_suite_end
     suite.remove 'complete', @_complete
@@ -43,6 +46,7 @@ class Reporter
   listen: (suite) ->
     suite.on 'test_start', @_test_start
     suite.on 'test_end', @_test_end
+    suite.on 'report', @_report
     suite.on 'suite_start', @_suite_start
     suite.on 'suite_end', @_suite_end
     suite.on 'complete', @_complete
@@ -71,7 +75,7 @@ class SimpleReporter extends Reporter
     else
       @_write "#{total_failed} out of #{total_tests} failed.\n"
   
-  _test_end: (report) =>
+  _report: (report) =>
     if not report.success
       error = parse_error report.error
       @_write "#{report.id}) #{report.descriptions.join ' '}:\n"
