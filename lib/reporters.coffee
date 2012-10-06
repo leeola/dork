@@ -60,11 +60,12 @@ class SimpleReporter extends Reporter
     super suite
     
     @_write = (args...) -> process.stdout.write args...
-   
-  _complete: (data) =>
-    total_tests = data.tests.all.length
-    total_passed = data.tests.passed.length
-    total_failed = data.tests.failed.length
+  
+  
+  _complete: (report) =>
+    total_tests = report.test_count.total
+    total_passed = report.test_count.passed
+    total_failed = report.test_count.failed
     
     if total_passed is total_tests
       @_write "#{total_tests} tests complete\n"
@@ -75,12 +76,20 @@ class SimpleReporter extends Reporter
     else
       @_write "#{total_failed} out of #{total_tests} failed.\n"
   
+  
   _report: (report) =>
     if not report.success
-      error = parse_error report.error
-      @_write "#{report.id}) #{report.descriptions.join ' '}:\n"
-      @_write "  #{error.name}: #{error.message}\n"
-      @_write "    #{error.stack.join '\n    '}\n"
+      switch report.type
+        when 'test'
+          error = parse_error report.error
+          @_write "#{report.id}) #{report.descriptions.join ' '}:\n"
+          @_write "  #{error.name}: #{error.message}\n"
+          @_write "    #{error.stack.join '\n    '}\n"
+        when 'after_all', 'after_each', 'before_all', 'before_each'
+          error = parse_error report.error
+          @_write "#{report.type}) #{report.descriptions.join ' '}:\n"
+          @_write "  #{error.name}: #{error.message}\n"
+          @_write "    #{error.stack.join '\n    '}\n"
 
 
 
