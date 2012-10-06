@@ -96,6 +96,7 @@ class Suite extends emighter.Emighter
           for report in reports
             report.type = 'after_all'
             report.description = 'AFTER ALL'
+            report.descriptions = descriptions
             @emit 'report', report
           @_session.report.success = false
           @_complete()
@@ -114,6 +115,7 @@ class Suite extends emighter.Emighter
         for report in reports
           report.type = 'after_each'
           report.description = 'AFTER EACH'
+          report.descriptions = descriptions
           @emit 'report', report
         @_session.report.success = false
         @_complete()
@@ -131,6 +133,7 @@ class Suite extends emighter.Emighter
             for report in reports
               report.type = 'before_all'
               report.description = 'BEFORE ALL'
+              report.descriptions = descriptions
               @emit 'report', report
             @_session.report.success = false
             @_complete()
