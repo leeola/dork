@@ -48,57 +48,104 @@ class Suite extends emighter.Emighter
   _on_child_after_each: (meta, done) =>
     @_run_after_eachs meta, -> done()
   
-  _on_child_complete: (data, done) =>
+  _on_child_complete: (report, done) =>
     # Loop through the child-suites tests and push this suites
     # description onto them.
-    for test in data.tests.all
-      if @description?
-        test.descriptions[0...0] = @description
-      @_session.tests.all.push test
+    #for test in data.tests.all
+    #  if @description?
+    #    test.descriptions[0...0] = @description
+    #  @_session.tests.all.push test
     
-    @_session.tests.failed.push data.tests.failed...
-    @_session.tests.passed.push data.tests.passed...
+    # This event will likely be phased out soon.
     @emit 'suite_end'
-    @_next()
+    
+    @_session.report.test_count.failed += report.test_count.failed
+    @_session.report.test_count.passed += report.test_count.passed
+    @_session.report.test_count.total += report.test_count.total
+    @_session.report.reports.suites.push report
+    
+    # If a child suite did not succeed, bail out.
+    if report.success
+      @_next()
+    else
+      @_session.report.success = false
+      @_complete()
   
   _complete: () =>
-    @_run_after_alls =>
-      reports =
-        tests:
-          all: @_session.tests.all
-          failed: @_session.tests.failed
-          passed: @_session.tests.passed
-      
-      if @_session.callback? then @_session.callback reports
-      @emit 'complete', reports
+    report = @_session.report
+    @_session.callback report
+    @emit 'report', report
+    @emit 'complete', report
   
   _run_after_alls: (callback) =>
     if @_session.ran_a_test
-      @_run_runners @_after_alls, =>
-        @emit 'after_all', [], =>
-          callback()
+      @_run_runners @_after_alls, (reports) =>
+        # If there is an error, it will be the last report..
+        if ((lreport = reports[-1..-1][0])? and lreport.success) or not lreport?
+          @emit 'after_all', [], =>
+            callback()
+        else
+          descriptions = @_session.descriptions[..]
+          descriptions.push '-- AFTER ALL'
+          for report in reports
+            report.type = 'after_all'
+            report.description = 'AFTER ALL'
+            @emit 'report', report
+          @_session.report.success = false
+          @_complete()
     else
       @emit 'after_all', [], =>
         callback()
   
   _run_after_eachs: (meta, callback) =>
-    @_run_runners @_after_eachs, =>
-      @emit 'after_each', [meta], =>
-        callback()
+    @_run_runners @_after_eachs, (reports) =>
+      if ((lreport = reports[-1..-1][0])? and lreport.success) or not lreport?
+        @emit 'after_each', [meta], =>
+          callback()
+      else
+        descriptions = @_session.descriptions[..]
+        descriptions.push '-- AFTER EACH'
+        for report in reports
+          report.type = 'after_each'
+          report.description = 'AFTER EACH'
+          @emit 'report', report
+        @_session.report.success = false
+        @_complete()
   
   _run_before_alls: (meta, callback) =>
     @emit 'before_all', [meta], =>
       if not @_session.ran_a_test
         @_session.ran_a_test = true
-        @_run_runners @_before_alls, =>
-          callback()
+        @_run_runners @_before_alls, (reports) =>
+          if ((lreport = reports[-1..-1][0])? and lreport.success) or not lreport?
+            callback()
+          else
+            descriptions = @_session.descriptions[..]
+            descriptions.push '-- BEFORE ALL'
+            for report in reports
+              report.type = 'before_all'
+              report.description = 'BEFORE ALL'
+              @emit 'report', report
+            @_session.report.success = false
+            @_complete()
       else
         callback()
   
   _run_before_eachs: (meta, callback) =>
     @emit 'before_each', [meta], =>
-      @_run_runners @_before_eachs, =>
-        callback()
+      @_run_runners @_before_eachs, (reports) =>
+        if ((lreport = reports[-1..-1][0])? and lreport.success) or not lreport?
+          callback()
+        else
+          descriptions = @_session.descriptions[..]
+          descriptions.push '-- BEFORE EACH'
+          for report in reports
+            report.type = 'before_each'
+            report.description = 'BEFORE EACH'
+            report.descriptions = descriptions
+            @emit 'report', report
+          @_session.report.success = false
+          @_complete()
   
   _run_test: (test, callback) =>
     # First increment the id index.
@@ -135,16 +182,18 @@ class Suite extends emighter.Emighter
         @emit 'test_start'
         test.run (report) =>
           # Add some meta
+          report.type = 'test'
           report.id = @_session.id_index
           report.descriptions = [@description, report.description]
           
-          @_session.tests.all.push report
+          @_session.report.reports.tests.push report
+          @_session.report.test_count.total++
           if report.success
-            @_session.tests.passed.push report
+            @_session.report.test_count.passed++
           else
-            @_session.tests.failed.push report
+            @_session.report.test_count.failed++
           
-          @emit 'test_end', report
+          @emit 'report', report
           @_run_after_eachs @_session.meta, =>
             callback()
   
@@ -161,6 +210,7 @@ class Suite extends emighter.Emighter
     suite.on 'test', (args...) => @emit 'test', args...
     suite.on 'test_start', (args...) => @emit 'test_start', args...
     suite.on 'test_end', (args...) => @emit 'test_end', args...
+    suite.on 'report', (args...) => @emit 'report', args...
     suite.on 'suite', (args...) => @emit 'suite', args...
     suite.on 'suite_start', (args...) => @emit 'suite_start', args...
     suite.on 'suite_end', (args...) => @emit 'suite_end', args...
@@ -173,9 +223,7 @@ class Suite extends emighter.Emighter
     @_session.item = @_tests_and_suites[++@_session.index]
     
     if not @_session.item?
-      if @_session.test_reports > 0
-        @_run_after_alls()
-      else
+      @_run_after_alls =>
         @_complete()
       
     else if @_session.item instanceof Suite
@@ -196,12 +244,25 @@ class Suite extends emighter.Emighter
       ran_a_test: false
       index: -1
       id_index: 0
-      tests:
-        all: []
-        failed: []
-        passed: []
       patterns: patterns
       callback: callback
+      
+      # We'll slowly be implementing a better report chain. This is the start.
+      report:
+        success: true
+        type: 'suite'
+        description: @description
+        test_count:
+          failed: 0
+          passed: 0
+          total: 0
+        reports:
+          after_alls: []
+          after_eachs: []
+          before_alls: []
+          before_eachs: []
+          suites: []
+          tests: []
     @_next()
   
   # (runners, callback, index=0, reports=[]) -> undefined
@@ -215,6 +276,11 @@ class Suite extends emighter.Emighter
   # Desc:
   #   An internal function to run a list of runners, and callback when
   #   complete.
+  #
+  #   Note that currently, this bails if there is a failure in any
+  #   of the runners. Currently Dork doesn't support any type of intelligent
+  #   pre/post test failure handling. Such as trying to call the after_all
+  #   function to close open sockets, opened by a bad before_all.. or whatever.
   _run_runners: (runners, callback, index=0, reports=[]) =>
     runner = runners[index]
     # If the item is null, callback with our collective reports.
@@ -225,7 +291,10 @@ class Suite extends emighter.Emighter
     # Run the runner!
     runner.run (report) =>
       reports.push report
-      @_run_runners runners, callback, ++index, reports
+      if report.success
+        @_run_runners runners, callback, ++index, reports
+      else
+        callback reports
   
   # (runner) -> undefined
   #
@@ -335,8 +404,8 @@ class Suite extends emighter.Emighter
       if typeof pattern is 'string'
         patterns[i] = utils.regex_like pattern
     
-    @_run patterns, 0, [], (reports) ->
-      callback reports
+    @_run patterns, 0, [], (report) ->
+      callback report
 
 
 

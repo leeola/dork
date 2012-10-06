@@ -112,6 +112,7 @@ describe 'Suite', ->
         ]
         done()
 
+
 # We're going to try a different approach here to structuring the tests.
 # Please bear with us.
 describe 'A suite', ->
@@ -250,10 +251,110 @@ describe 'A suite', ->
       run_log.should.eql([])
 
 
+# And another slight design. So far, all i like is the kitchen sink method.
+# The above method (defining the suites in tiny segments) is messy and
+# hard to read.
+describe 'A suite', ->
+  {Suite} = require '../lib/suite'
+  {Runner} = require '../lib/runner'
+  {Test} = require '../lib/test'
+  run_log = null
+  
+  
+  before_each ->
+    run_log = []
+  
+  
+  it 'should not continue after an before_all error.', (done) ->
+    suite = new Suite()
+    suite.add_before_all ->
+      run_log.push 'before_all one'
+      throw new Error 'This error will be suppressed by the suite.'
+    suite.add_before_all -> run_log.push 'before_all two'
+    suite.add_before_each -> run_log.push 'before_each'
+    suite.add_test -> run_log.push 'test one'
+    suite.add_test -> run_log.push 'test two'
+    suite.add_after_each -> run_log.push 'after_each'
+    suite.add_after_all -> run_log.push 'after_all'
+    
+    suite.run ->
+      run_log.should.eql [
+        'before_all one'
+        ]
+      done()
+  
+  
+  it 'should not continue after an before_each error.', (done) ->
+    suite = new Suite()
+    suite.add_before_each ->
+      run_log.push 'before_each one'
+      throw new Error 'This error will be suppressed by the suite.'
+    suite.add_before_each -> run_log.push 'before_each two'
+    suite.add_test -> run_log.push 'test one'
+    suite.add_test -> run_log.push 'test two'
+    suite.add_after_each -> run_log.push 'after_each'
+    suite.add_after_all -> run_log.push 'after_all'
+    suite.run ->
+      run_log.should.eql [
+        'before_each one'
+        ]
+      done()
+  
+  
+  it 'should not continue after an after_each error.', (done) ->
+    suite = new Suite()
+    suite.add_before_all -> run_log.push 'before_all'
+    suite.add_before_each -> run_log.push 'before_each'
+    suite.add_test -> run_log.push 'test one'
+    suite.add_test -> run_log.push 'test two'
+    # This should never be called
+    suite.add_after_each ->
+      run_log.push 'after_each one'
+      throw new Error 'This error will be suppressed by the suite.'
+    suite.add_after_each -> run_log.push 'after_each two'
+    suite.add_after_all -> run_log.push 'after_all'
+    
+    suite.run ->
+      run_log.should.eql [
+        'before_all'
+        'before_each'
+        'test one'
+        'after_each one'
+        ]
+      done()
+  
+  
+  it 'should not continue after an after_all error.', (done) ->
+    suite = new Suite()
+    suite.add_before_all -> run_log.push 'before_all'
+    suite.add_before_each -> run_log.push 'before_each'
+    suite.add_test -> run_log.push 'test one'
+    suite.add_test -> run_log.push 'test two'
+    # This should never be called
+    suite.add_after_each -> run_log.push 'after_each'
+    suite.add_after_all ->
+      run_log.push 'after_all one'
+      throw new Error 'This error will be suppressed by the suite.'
+    suite.add_after_all -> run_log.push 'after_all two'
+    
+    suite.run ->
+      run_log.should.eql [
+        'before_all'
+        'before_each'
+        'test one'
+        'after_each'
+        'before_each'
+        'test two'
+        'after_each'
+        'after_all one'
+        # Should not call 'after_all two'
+        ]
+      done()
+
+
 # This is our catch-all test. Because there are a *lot* of possibilities
 # with this set of tests, we're going to do a bunch of random tests,
 # and one test that does one of everything.
-# A suite
 describe 'A suite with a kitchen sink', ->
   {Suite} = require '../lib/suite'
   {Runner} = require '../lib/runner'
