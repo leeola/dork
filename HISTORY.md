@@ -7,6 +7,8 @@
     but as of yet, i cannot find another way to implement it due to how dork
     stores its session in the `require 'dork'` index file.
   * Fixed the index issue with subsuites not incrementing properly.
+  * Added proper suite handling for a before/after failure. The suite itself
+    now fails, and parent suites will not continue either.
 
 0.0.5 / 2012-08-24
 ==================
