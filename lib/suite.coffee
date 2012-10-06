@@ -61,8 +61,14 @@ class Suite extends emighter.Emighter
     
     @_session.report.test_count.failed += report.test_count.failed
     @_session.report.test_count.passed += report.test_count.passed
+    @_session.report.test_count.skipped += report.test_count.skipped
     @_session.report.test_count.total += report.test_count.total
     @_session.report.reports.suites.push report
+    
+    # Don't forget to update our id_index, based on how many tests ran.
+    @_session.id_index += report.test_count.total
+    # and how many could have run.
+    @_session.id_index += report.test_count.skipped
     
     # If a child suite did not succeed, bail out.
     if report.success
@@ -148,9 +154,6 @@ class Suite extends emighter.Emighter
           @_complete()
   
   _run_test: (test, callback) =>
-    # First increment the id index.
-    @_session.id_index++
-    
     # Next we need to process through all patterns to match for.
     if @_session.patterns.length > 0
       matched_pattern = false
@@ -173,6 +176,8 @@ class Suite extends emighter.Emighter
       # Now we check to make sure at least one of the patterns matched. If
       # none did, bail out of this test.
       if not matched_pattern
+        @_session.report.test_count.skipped++
+        @_session.id_index++
         callback()
         return
     
@@ -195,6 +200,8 @@ class Suite extends emighter.Emighter
           
           @emit 'report', report
           @_run_after_eachs @_session.meta, =>
+            # And since we're done with our test, increment the id_index.
+            @_session.id_index++
             callback()
   
   _run_suite: (suite) =>
@@ -243,7 +250,7 @@ class Suite extends emighter.Emighter
       descriptions: descriptions
       ran_a_test: false
       index: -1
-      id_index: 0
+      id_index: id_index
       patterns: patterns
       callback: callback
       
@@ -255,6 +262,7 @@ class Suite extends emighter.Emighter
         test_count:
           failed: 0
           passed: 0
+          skipped: 0
           total: 0
         reports:
           after_alls: []
