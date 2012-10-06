@@ -63,18 +63,25 @@ class SimpleReporter extends Reporter
   
   
   _complete: (report) =>
-    total_tests = report.test_count.total
-    total_passed = report.test_count.passed
     total_failed = report.test_count.failed
+    total_passed = report.test_count.passed
+    total_skipped = report.test_count.skipped
+    total_tests = report.test_count.total
     
     if total_passed is total_tests
-      @_write "#{total_tests} tests complete\n"
-    else if (total_failed + total_passed) < total_tests
-      # This is worded horribly lol. Needs to be improved.
-      @_write "#{total_failed} failed of #{total_passed} run, "+
-        "#{total_tests} possible\n"
+      print_string = "#{total_tests} complete"
+      if total_skipped > 0
+        print_string += " and #{total_skipped} skipped"
+      print_string += '\n'
+      @_write print_string
     else
-      @_write "#{total_failed} out of #{total_tests} failed.\n"
+      print_string = "#{total_failed} out of #{total_tests} failed"
+      
+      if total_skipped > 0
+        print_string += " and #{total_skipped} skipped"
+      print_string += '\n'
+      
+      @_write print_string
   
   
   _report: (report) =>
