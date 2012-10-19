@@ -9,6 +9,8 @@
   * Fixed the index issue with subsuites not incrementing properly.
   * Added proper suite handling for a before/after failure. The suite itself
     now fails, and parent suites will not continue either.
+  * Added async error catching support. This is currently Nodejs only,
+    browser support will come with the browser focused version.
 
 0.0.5 / 2012-08-24
 ==================
