@@ -57,15 +57,33 @@ class Runner
     done = =>
       if running
         running = false
+        process.removeListener 'uncaughtException', asynchronous_error
         callback @_create_report new Date() - start_time
     
     # The timeout function
     timeout_callback = =>
       if running
         running = false
+        process.removeListener 'uncaughtException', asynchronous_error
         time = new Date() - start_time
         
         callback @_create_report time, timeout_error
+    
+    # Our async error callback.
+    asynchronous_error = (error) =>
+      if running
+        running = false
+        process.removeListener 'uncaughtException', asynchronous_error
+        callback @_create_report new Date() - start_time, error
+    
+    # For now we're only supporting Nodejs. Browsers will likely be supported
+    # via window.onerror.
+    if @asynchronous
+      #if not nodejs
+      #  window.onerror = (message, url, line) ->
+      #   #do stuff
+      #else
+      process.on 'uncaughtException', asynchronous_error
     
     start_time = new Date()
     try
