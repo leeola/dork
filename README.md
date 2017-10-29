@@ -6,7 +6,7 @@
 Dork.js is yet another testing framework. What sets it apart? Nothing. As time
 goes on there will be some interesting features that set it apart, but for now
 you'll be much better off with
-[Mocha](http://visionmedia.github.com/mocha/)/etc.
+[Mocha](https://mochajs.org/)/etc.
 
 ## Installation
 
